@@ -1,28 +1,43 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="form-page form-wide">
-    <h2>📤 Загрузить мод</h2>
+    <div class="form-icon">📤</div>
+    <h2>Загрузить мод</h2>
+    <p class="form-subtitle">Поделись своим модом с сообществом</p>
     <form method="POST" enctype="multipart/form-data">
-        <input type="text" name="title" placeholder="Название мода" required>
-        <textarea name="description" placeholder="Описание мода..." rows="5" required></textarea>
-        <input type="text" name="version" placeholder="Версия мода (например 1.0)" required>
-        <select name="mc_version" required>
-            <option value="">Версия Minecraft</option>
-            {% for v in versions %}
-                <option value="{{ v }}">{{ v }}</option>
-            {% endfor %}
-        </select>
+        <label>Название мода</label>
+        <input type="text" name="title" placeholder="Например: Magic Wands" required>
+        <label>Описание</label>
+        <textarea name="description" placeholder="Расскажи что делает мод..." rows="5" required></textarea>
+        <div class="form-row">
+            <div>
+                <label>Версия мода</label>
+                <input type="text" name="version" placeholder="1.0.0" required>
+            </div>
+            <div>
+                <label>Версия Minecraft</label>
+                <select name="mc_version" required>
+                    <option value="">Выбери</option>
+                    {% for v in versions %}
+                        <option value="{{ v }}">{{ v }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <label>Категория</label>
         <select name="category" required>
-            <option value="">Категория</option>
+            <option value="">Выбери категорию</option>
             {% for cat in categories %}
                 <option value="{{ cat }}">{{ cat }}</option>
             {% endfor %}
         </select>
         <label class="file-label">
-            📁 Выберите .jar файл (макс 50 МБ)
+            <div class="file-icon">📁</div>
+            <div class="file-text">Выбери .jar файл</div>
+            <div class="file-hint">Максимум 50 МБ</div>
             <input type="file" name="mod_file" accept=".jar" required>
         </label>
-        <button type="submit">Опубликовать</button>
+        <button type="submit">🚀 Опубликовать мод</button>
     </form>
 </div>
 {% endblock %}

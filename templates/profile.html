@@ -1,22 +1,49 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="profile-page">
-    <h2>👤 {{ current_user.username }}</h2>
-    <p>Email: {{ current_user.email }}</p>
-    <p>Зарегистрирован: {{ current_user.created_at.strftime('%d.%m.%Y') }}</p>
+<div class="profile-header">
+    <div class="profile-avatar-big">{{ current_user.username[0]|upper }}</div>
+    <div>
+        <h1>{{ current_user.username }}</h1>
+        <p class="profile-email">{{ current_user.email }}</p>
+        {% if current_user.bio %}
+            <p class="profile-bio">{{ current_user.bio }}</p>
+        {% endif %}
+        <p class="profile-date">📅 С нами с {{ current_user.created_at.strftime('%d.%m.%Y') }}</p>
+    </div>
+</div>
 
-    <h3>Мои моды ({{ mods|length }})</h3>
+<div class="profile-stats">
+    <div class="stat-card">
+        <div class="stat-num">{{ mods|length }}</div>
+        <div class="stat-label">Модов</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ mods|sum(attribute='downloads') }}</div>
+        <div class="stat-label">Скачиваний</div>
+    </div>
+</div>
 
+<h3 class="section-title">📦 Мои моды</h3>
+
+<div class="my-mods-grid">
     {% for mod in mods %}
-    <div class="my-mod">
-        <a href="{{ url_for('mod_page', mod_id=mod.id) }}">{{ mod.title }}</a>
-        <span>⬇ {{ mod.downloads }}</span>
-        <form method="POST" action="{{ url_for('delete_mod', mod_id=mod.id) }}" style="display:inline">
-            <button type="submit" class="btn-delete" onclick="return confirm('Удалить мод?')">🗑</button>
+    <div class="my-mod-card">
+        <div class="mod-category">{{ mod.category }}</div>
+        <a href="{{ url_for('mod_page', mod_id=mod.id) }}" class="my-mod-title">{{ mod.title }}</a>
+        <div class="my-mod-meta">
+            <span>MC {{ mod.mc_version }}</span>
+            <span>⬇ {{ mod.downloads }}</span>
+        </div>
+        <form method="POST" action="{{ url_for('delete_mod', mod_id=mod.id) }}">
+            <button type="submit" class="btn-delete" onclick="return confirm('Удалить мод?')">🗑 Удалить</button>
         </form>
     </div>
     {% else %}
-        <p>Вы ещё не загрузили ни одного мода</p>
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h3>У тебя пока нет модов</h3>
+            <a href="{{ url_for('upload') }}" class="btn-download-big">Загрузить первый мод</a>
+        </div>
     {% endfor %}
 </div>
 {% endblock %}

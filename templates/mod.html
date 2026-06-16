@@ -1,29 +1,46 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="mod-detail">
-    <div class="mod-header">
+    <div class="mod-detail-header">
         <span class="mod-category">{{ mod.category }}</span>
         <h1>{{ mod.title }}</h1>
-        <p class="mod-meta">
-            👤 {{ mod.author.username }} ·
-            📅 {{ mod.created_at.strftime('%d.%m.%Y') }} ·
-            ⬇ {{ mod.downloads }} скачиваний
-        </p>
+        <div class="mod-meta-row">
+            <span>👤 {{ mod.author.username }}</span>
+            <span>📅 {{ mod.created_at.strftime('%d.%m.%Y') }}</span>
+            <span>⬇ {{ mod.downloads }}</span>
+        </div>
     </div>
 
-    <div class="mod-info">
-        <table>
-            <tr><td>Версия мода</td><td>{{ mod.version }}</td></tr>
-            <tr><td>Minecraft</td><td>{{ mod.mc_version }}</td></tr>
-            <tr><td>Категория</td><td>{{ mod.category }}</td></tr>
-        </table>
-    </div>
+    <div class="mod-detail-grid">
+        <div class="mod-detail-info">
+            <table class="info-table">
+                <tr><td>Версия мода</td><td><strong>{{ mod.version }}</strong></td></tr>
+                <tr><td>Minecraft</td><td><strong>{{ mod.mc_version }}</strong></td></tr>
+                <tr><td>Категория</td><td><strong>{{ mod.category }}</strong></td></tr>
+                <tr><td>Скачиваний</td><td><strong>{{ mod.downloads }}</strong></td></tr>
+            </table>
 
-    <div class="mod-description">
-        <h3>Описание</h3>
-        <p>{{ mod.description }}</p>
-    </div>
+            <div class="mod-description">
+                <h3>📖 Описание</h3>
+                <p>{{ mod.description }}</p>
+            </div>
+        </div>
 
-    <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download-big">⬇ Скачать .jar</a>
+        <div class="mod-detail-sidebar">
+            <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download-big">
+                ⬇ Скачать .jar
+            </a>
+            <div class="mod-quick-info">
+                <div class="qi-row">
+                    <span>Автор</span>
+                    <strong>{{ mod.author.username }}</strong>
+                </div>
+                <div class="qi-row">
+                    <span>Опубликовано</span>
+                    <strong>{{ mod.created_at.strftime('%d.%m.%Y') }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

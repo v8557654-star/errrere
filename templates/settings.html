@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">⚙️ Настройки</h1>
+        <p class="page-subtitle">Настрой сайт под себя</p>
+    </div>
+</div>
+
+<div class="settings-grid">
+
+    <div class="settings-card">
+        <h3>🎨 Тема оформления</h3>
+        <p class="settings-desc">Выбери цветовую схему сайта</p>
+        <form method="POST">
+            <input type="hidden" name="action" value="theme">
+            <div class="theme-grid">
+                <label class="theme-option theme-green {% if current_user.theme == 'green' %}active{% endif %}">
+                    <input type="radio" name="theme" value="green" {% if current_user.theme == 'green' %}checked{% endif %}>
+                    <div class="theme-preview">
+                        <div class="tp-bar"></div>
+                        <div class="tp-content"></div>
+                    </div>
+                    <div class="theme-name">Зелёный</div>
+                </label>
+                <label class="theme-option theme-blue {% if current_user.theme == 'blue' %}active{% endif %}">
+                    <input type="radio" name="theme" value="blue" {% if current_user.theme == 'blue' %}checked{% endif %}>
+                    <div class="theme-preview">
+                        <div class="tp-bar"></div>
+                        <div class="tp-content"></div>
+                    </div>
+                    <div class="theme-name">Синий</div>
+                </label>
+                <label class="theme-option theme-purple {% if current_user.theme == 'purple' %}active{% endif %}">
+                    <input type="radio" name="theme" value="purple" {% if current_user.theme == 'purple' %}checked{% endif %}>
+                    <div class="theme-preview">
+                        <div class="tp-bar"></div>
+                        <div class="tp-content"></div>
+                    </div>
+                    <div class="theme-name">Фиолетовый</div>
+                </label>
+                <label class="theme-option theme-orange {% if current_user.theme == 'orange' %}active{% endif %}">
+                    <input type="radio" name="theme" value="orange" {% if current_user.theme == 'orange' %}checked{% endif %}>
+                    <div class="theme-preview">
+                        <div class="tp-bar"></div>
+                        <div class="tp-content"></div>
+                    </div>
+                    <div class="theme-name">Оранжевый</div>
+                </label>
+                <label class="theme-option theme-pink {% if current_user.theme == 'pink' %}active{% endif %}">
+                    <input type="radio" name="theme" value="pink" {% if current_user.theme == 'pink' %}checked{% endif %}>
+                    <div class="theme-preview">
+                        <div class="tp-bar"></div>
+                        <div class="tp-content"></div>
+                    </div>
+                    <div class="theme-name">Розовый</div>
+                </label>
+                <label class="theme-option theme-light {% if current_user.theme == 'light' %}active{% endif %}">
+                    <input type="radio" name="theme" value="light" {% if current_user.theme == 'light' %}checked{% endif %}>
+                    <div class="theme-preview">
+                        <div class="tp-bar"></div>
+                        <div class="tp-content"></div>
+                    </div>
+                    <div class="theme-name">Светлая</div>
+                </label>
+            </div>
+            <button type="submit" class="btn-save">Сохранить тему</button>
+        </form>
+    </div>
+
+    <div class="settings-card">
+        <h3>✨ Анимации</h3>
+        <p class="settings-desc">Включи или выключи анимации интерфейса</p>
+        <form method="POST">
+            <input type="hidden" name="action" value="animations">
+            <label class="switch-row">
+                <span>Анимации интерфейса</span>
+                <label class="switch">
+                    <input type="checkbox" name="animations" {% if current_user.animations %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </label>
+            <button type="submit" class="btn-save">Сохранить</button>
+        </form>
+    </div>
+
+    <div class="settings-card">
+        <h3>👤 Профиль</h3>
+        <p class="settings-desc">Информация о тебе</p>
+        <form method="POST">
+            <input type="hidden" name="action" value="profile">
+            <label>Email</label>
+            <input type="email" name="email" value="{{ current_user.email }}">
+            <label>О себе</label>
+            <textarea name="bio" rows="3" maxlength="300" placeholder="Расскажи о себе...">{{ current_user.bio }}</textarea>
+            <button type="submit" class="btn-save">Сохранить профиль</button>
+        </form>
+    </div>
+
+    <div class="settings-card">
+        <h3>🔒 Пароль</h3>
+        <p class="settings-desc">Смени пароль для безопасности</p>
+        <form method="POST">
+            <input type="hidden" name="action" value="password">
+            <label>Текущий пароль</label>
+            <input type="password" name="old_password" required>
+            <label>Новый пароль</label>
+            <input type="password" name="new_password" required minlength="6">
+            <button type="submit" class="btn-save">Изменить пароль</button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
