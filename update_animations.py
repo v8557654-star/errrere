@@ -1,4 +1,9 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
+# -*- coding: utf-8 -*-
+import os
+
+print("✨ Добавляю анимации...")
+
+style_css = '''* { margin: 0; padding: 0; box-sizing: border-box; }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
@@ -648,3 +653,18 @@ footer {
     .mods-grid { grid-template-columns: 1fr; }
     .hero h1 { font-size: 32px; }
 }
+'''
+
+os.makedirs("static/css", exist_ok=True)
+with open("static/css/style.css", "w", encoding="utf-8") as f:
+    f.write(style_css)
+
+print("✅ Анимации добавлены!")
+print("\n📤 Теперь залей на сайт:")
+print("   git add .")
+print('   git commit -m "Добавил анимации"')
+print("   git push")
+print("\nЗатем на PythonAnywhere в Bash:")
+print("   cd ~/mysite")
+print("   git pull")
+print("\nИ нажми Reload на вкладке Web")
