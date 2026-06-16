@@ -2,18 +2,29 @@
 {% block content %}
 <div class="form-page form-wide">
     <div class="form-icon">📤</div>
-    <h2>Загрузить мод</h2>
-    <p class="form-subtitle">Поделись своим модом с сообществом</p>
+    <h2>Загрузить контент</h2>
+    <p class="form-subtitle">Поделись модом, шейдером, картой и др.</p>
+
+    <div class="upload-type-tabs">
+        {% for tk, tn, ti, ext in content_types %}
+        <a href="{{ url_for('upload', content_type=tk) }}" class="ut-tab {% if content_type == tk %}active{% endif %}">
+            <span class="ut-icon">{{ ti }}</span>
+            <span class="ut-name">{{ tn }}</span>
+            <span class="ut-ext">{{ ext }}</span>
+        </a>
+        {% endfor %}
+    </div>
+
     <form method="POST" enctype="multipart/form-data">
-        <label>Название мода</label>
-        <input type="text" name="title" placeholder="Например: Magic Wands" required>
+        <label>Название</label>
+        <input type="text" name="title" placeholder="Например: Complementary Shaders" required>
 
         <label>Описание</label>
-        <textarea name="description" placeholder="Расскажи что делает мод..." rows="5" required></textarea>
+        <textarea name="description" placeholder="Расскажи что это и зачем нужно..." rows="5" required></textarea>
 
         <div class="form-row">
             <div>
-                <label>Версия мода</label>
+                <label>Версия</label>
                 <input type="text" name="version" placeholder="1.0.0" required>
             </div>
             <div>
@@ -36,13 +47,18 @@
         </select>
 
         <label>Теги (через запятую)</label>
-        <input type="text" name="tags" placeholder="магия, оружие, рпг, выживание">
+        <input type="text" name="tags" placeholder="реализм, оптимизация, RTX, ванильный">
 
         <label class="file-label">
             <div class="file-icon">📁</div>
-            <div class="file-text">Выбери .jar файл</div>
+            <div class="file-text">
+                Выбери файл
+                {% for tk, tn, ti, ext in content_types %}
+                    {% if content_type == tk %}({{ ext }}){% endif %}
+                {% endfor %}
+            </div>
             <div class="file-hint">Максимум 50 МБ</div>
-            <input type="file" name="mod_file" accept=".jar" required>
+            <input type="file" name="mod_file" required>
         </label>
 
         <label>📸 Скриншоты (необязательно, до 5)</label>
@@ -55,7 +71,7 @@
             {% endfor %}
         </div>
 
-        <button type="submit">🚀 Опубликовать мод</button>
+        <button type="submit">🚀 Опубликовать</button>
     </form>
 </div>
 {% endblock %}

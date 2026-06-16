@@ -107,6 +107,7 @@ class Mod(db.Model):
     description = db.Column(db.Text, nullable=False)
     version = db.Column(db.String(20), nullable=False)
     mc_version = db.Column(db.String(20), nullable=False)
+    content_type = db.Column(db.String(30), default='mod')
     category = db.Column(db.String(50), nullable=False)
     filename = db.Column(db.String(300), nullable=False)
     downloads = db.Column(db.Integer, default=0)
@@ -202,8 +203,15 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
-def allowed_file(filename):
-    return filename.lower().endswith('.jar')
+def allowed_file(filename, content_type='mod'):
+    fn = filename.lower()
+    if content_type in ('mod', 'plugin'):
+        return fn.endswith('.jar')
+    elif content_type in ('shader', 'resourcepack', 'datapack', 'map'):
+        return fn.endswith('.zip')
+    elif content_type == 'modpack':
+        return fn.endswith('.zip') or fn.endswith('.mrpack')
+    return fn.endswith('.jar') or fn.endswith('.zip') or fn.endswith('.mrpack')
 
 def allowed_image(filename):
     return filename.lower().rsplit('.', 1)[-1] in {'jpg', 'jpeg', 'png', 'gif', 'webp'}
@@ -244,7 +252,10 @@ def index():
     category = request.args.get('category', '')
     mc_version = request.args.get('mc_version', '')
     sort = request.args.get('sort', 'new')
+    content_type = request.args.get('type', '')
     query = Mod.query
+    if content_type:
+        query = query.filter_by(content_type=content_type)
     if search:
         query = query.filter(or_(Mod.title.ilike(f'%{search}%'), Mod.description.ilike(f'%{search}%'), Mod.tags.ilike(f'%{search}%')))
     if category: query = query.filter_by(category=category)
@@ -258,9 +269,20 @@ def index():
     latest_news = News.query.order_by(News.created_at.desc()).limit(3).all()
     categories = ['Магия', 'Техника', 'Оружие', 'Мобы', 'Декор', 'Еда', 'Миры', 'Утилиты', 'Другое']
     versions = ['1.21.4', '1.21.3', '1.21.1', '1.21', '1.20.6', '1.20.4', '1.20.2', '1.20.1', '1.19.4', '1.19.2', '1.18.2', '1.17.1', '1.16.5', '1.12.2', '1.8.9', '1.7.10']
+    content_types_list = [
+        ('', 'Всё', '🎯'),
+        ('mod', 'Моды', '⛏'),
+        ('shader', 'Шейдеры', '🌅'),
+        ('plugin', 'Плагины', '🔌'),
+        ('resourcepack', 'Ресурспаки', '🎨'),
+        ('modpack', 'Сборки', '📦'),
+        ('datapack', 'Датапаки', '📝'),
+        ('map', 'Карты', '🗺️'),
+    ]
     return render_template('index.html', mods=mods, top_mods=top_mods, latest_news=latest_news,
                            categories=categories, versions=versions, search=search,
-                           sel_category=category, sel_version=mc_version, sort=sort)
+                           sel_category=category, sel_version=mc_version, sort=sort,
+                           content_type=content_type, content_types_list=content_types_list)
 
 @app.route('/news')
 def news_list():
@@ -376,15 +398,19 @@ def logout():
     return redirect(url_for('index'))
 
 @app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload/<content_type>', methods=['GET', 'POST'])
 @login_required
-def upload():
+def upload(content_type='mod'):
+    valid_types = ['mod', 'shader', 'plugin', 'resourcepack', 'modpack', 'datapack', 'map']
+    if content_type not in valid_types:
+        content_type = 'mod'
     categories = ['Магия', 'Техника', 'Оружие', 'Мобы', 'Декор', 'Еда', 'Миры', 'Утилиты', 'Другое']
     versions = ['1.21.4', '1.21.3', '1.21.1', '1.21', '1.20.6', '1.20.4', '1.20.2', '1.20.1', '1.19.4', '1.19.2', '1.18.2', '1.17.1', '1.16.5', '1.12.2', '1.8.9', '1.7.10']
     if request.method == 'POST':
         file = request.files.get('mod_file')
-        if not file or not allowed_file(file.filename):
-            flash('Загрузите .jar файл!', 'error')
-            return redirect(url_for('upload'))
+        if not file or not allowed_file(file.filename, content_type):
+            flash(f'Неверный формат файла для типа: {content_type}', 'error')
+            return redirect(url_for('upload', content_type=content_type))
         filename = secure_filename(file.filename)
         unique_name = f"{current_user.id}_{int(datetime.utcnow().timestamp())}_{filename}"
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_name))
@@ -400,7 +426,8 @@ def upload():
             title=request.form['title'], description=request.form['description'],
             version=request.form['version'], mc_version=request.form['mc_version'],
             category=request.form['category'], tags=request.form.get('tags', ''),
-            screenshots=','.join(screenshots), filename=unique_name, user_id=current_user.id
+            screenshots=','.join(screenshots), filename=unique_name, user_id=current_user.id,
+            content_type=content_type
         )
         db.session.add(mod); db.session.flush()
         log_activity(current_user.id, 'uploaded', f'Опубликовал мод "{mod.title}"', url_for('mod_page', mod_id=mod.id))
@@ -411,7 +438,17 @@ def upload():
         db.session.commit()
         flash('Мод успешно опубликован!', 'success')
         return redirect(url_for('mod_page', mod_id=mod.id))
-    return render_template('upload.html', categories=categories, versions=versions)
+    content_types = [
+        ('mod', 'Мод', '⛏', '.jar'),
+        ('shader', 'Шейдер', '🌅', '.zip'),
+        ('plugin', 'Плагин', '🔌', '.jar'),
+        ('resourcepack', 'Ресурспак', '🎨', '.zip'),
+        ('modpack', 'Сборка', '📦', '.zip / .mrpack'),
+        ('datapack', 'Датапак', '📝', '.zip'),
+        ('map', 'Карта', '🗺️', '.zip'),
+    ]
+    return render_template('upload.html', categories=categories, versions=versions,
+                          content_type=content_type, content_types=content_types)
 
 @app.route('/mod/<int:mod_id>')
 def mod_page(mod_id):
@@ -741,17 +778,22 @@ MODRINTH_API = "https://api.modrinth.com/v2"
 MODRINTH_HEADERS = {"User-Agent": "MineMods/1.0 (contact@minemods.local)"}
 
 @app.route('/modrinth')
-def modrinth_search():
+@app.route('/modrinth/<project_type>')
+def modrinth_search(project_type='mod'):
     query = request.args.get('q', '')
     mc_version = request.args.get('mc_version', '')
     category = request.args.get('category', '')
-    sort = request.args.get('sort', 'relevance')  # relevance, downloads, follows, newest, updated
+    sort = request.args.get('sort', 'relevance')
     page = int(request.args.get('page', 1))
     limit = 20
     offset = (page - 1) * limit
 
-    # Формируем facets для фильтров
-    facets = [["project_type:mod"]]
+    # Валидация типа
+    valid_types = ['mod', 'shader', 'plugin', 'resourcepack', 'modpack', 'datapack']
+    if project_type not in valid_types:
+        project_type = 'mod'
+
+    facets = [[f"project_type:{project_type}"]]
     if mc_version:
         facets.append([f"versions:{mc_version}"])
     if category:
@@ -803,10 +845,19 @@ def modrinth_search():
 
     total_pages = (total + limit - 1) // limit if total else 1
 
+    content_types = [
+        ('mod', 'Моды', '⛏'),
+        ('shader', 'Шейдеры', '🌅'),
+        ('plugin', 'Плагины', '🔌'),
+        ('resourcepack', 'Ресурспаки', '🎨'),
+        ('modpack', 'Сборки', '📦'),
+        ('datapack', 'Датапаки', '📝'),
+    ]
     return render_template('modrinth_search.html',
         results=results, query=query, mc_version=mc_version, category=category,
         sort=sort, page=page, total=total, total_pages=total_pages,
-        mr_categories=mr_categories, versions=versions)
+        mr_categories=mr_categories, versions=versions,
+        project_type=project_type, content_types=content_types)
 
 @app.route('/modrinth/project/<slug>')
 def modrinth_project(slug):
@@ -924,6 +975,7 @@ with app.app_context():
                 "ALTER TABLE mod ADD COLUMN views INTEGER DEFAULT 0",
                 "ALTER TABLE mod ADD COLUMN tags VARCHAR(300) DEFAULT ''",
                 "ALTER TABLE mod ADD COLUMN screenshots TEXT DEFAULT ''",
+                "ALTER TABLE mod ADD COLUMN content_type VARCHAR(30) DEFAULT 'mod'",
             ]:
                 try: conn.execute(text(sql))
                 except: pass
