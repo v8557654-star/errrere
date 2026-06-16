@@ -782,6 +782,81 @@ def modrinth_download():
         abort(400)
     return redirect(file_url)
 
+
+# ===== GITHUB API =====
+GITHUB_API = "https://api.github.com"
+GITHUB_HEADERS = {
+    "Accept": "application/vnd.github.v3+json",
+    "User-Agent": "MineMods/1.0",
+}
+
+@app.route('/github')
+def github_search():
+    query = request.args.get('q', 'minecraft mod')
+    sort = request.args.get('sort', 'stars')  # stars, forks, updated
+    page = int(request.args.get('page', 1))
+
+    # Добавляем minecraft если не указано
+    search_q = query if 'minecraft' in query.lower() else f"{query} minecraft mod"
+
+    params = {
+        'q': search_q + ' language:Java',
+        'sort': sort,
+        'order': 'desc',
+        'per_page': 20,
+        'page': page,
+    }
+
+    try:
+        r = requests.get(f"{GITHUB_API}/search/repositories", params=params,
+                        headers=GITHUB_HEADERS, timeout=10)
+        data = r.json()
+        results = data.get('items', [])
+        total = min(data.get('total_count', 0), 1000)  # GitHub лимит 1000
+    except Exception as e:
+        results = []
+        total = 0
+        flash(f'Ошибка GitHub: {str(e)}', 'error')
+
+    total_pages = min((total + 19) // 20, 50)
+
+    return render_template('github_search.html',
+        results=results, query=query, sort=sort,
+        page=page, total=total, total_pages=total_pages)
+
+@app.route('/github/repo/<owner>/<repo>')
+def github_repo(owner, repo):
+    try:
+        # Инфо о репозитории
+        r = requests.get(f"{GITHUB_API}/repos/{owner}/{repo}",
+                        headers=GITHUB_HEADERS, timeout=10)
+        if r.status_code != 200:
+            flash('Репозиторий не найден', 'error')
+            return redirect(url_for('github_search'))
+        repo_data = r.json()
+
+        # Релизы
+        rel = requests.get(f"{GITHUB_API}/repos/{owner}/{repo}/releases",
+                          headers=GITHUB_HEADERS, timeout=10, params={'per_page': 10})
+        releases = rel.json() if rel.status_code == 200 else []
+
+        # README
+        readme_text = ''
+        try:
+            rd = requests.get(f"{GITHUB_API}/repos/{owner}/{repo}/readme",
+                            headers={**GITHUB_HEADERS, 'Accept': 'application/vnd.github.html'},
+                            timeout=10)
+            if rd.status_code == 200:
+                readme_text = rd.text
+        except: pass
+
+    except Exception as e:
+        flash(f'Ошибка: {str(e)}', 'error')
+        return redirect(url_for('github_search'))
+
+    return render_template('github_repo.html',
+                          repo=repo_data, releases=releases, readme=readme_text)
+
 with app.app_context():
     db.create_all()
     try:

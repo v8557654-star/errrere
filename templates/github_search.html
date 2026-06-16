@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="github-header">
+    <div class="gh-logo">
+        <div class="gh-logo-icon">🦊</div>
+        <div>
+            <h1>GitHub</h1>
+            <p>Open-source моды и проекты</p>
+        </div>
+    </div>
+    <div class="gh-stats">
+        <strong>{{ total }}</strong> репозиториев найдено
+    </div>
+</div>
+
+<div class="search-bar">
+    <form method="GET" action="{{ url_for('github_search') }}">
+        <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" name="q" placeholder="Поиск (например: sodium, optifine, create)..." value="{{ query }}" autofocus>
+        </div>
+        <button type="submit">Найти</button>
+    </form>
+</div>
+
+<div class="sort-tabs">
+    <a href="{{ url_for('github_search', q=query, sort='stars') }}"
+       class="sort-tab {% if sort == 'stars' %}active{% endif %}">⭐ Звёзды</a>
+    <a href="{{ url_for('github_search', q=query, sort='forks') }}"
+       class="sort-tab {% if sort == 'forks' %}active{% endif %}">🍴 Форки</a>
+    <a href="{{ url_for('github_search', q=query, sort='updated') }}"
+       class="sort-tab {% if sort == 'updated' %}active{% endif %}">🔄 Обновлённые</a>
+</div>
+
+<div class="modrinth-grid">
+    {% for repo in results %}
+    <a href="{{ url_for('github_repo', owner=repo.owner.login, repo=repo.name) }}" class="mr-card gh-card">
+        <div class="mr-card-icon">
+            <img src="{{ repo.owner.avatar_url }}" alt="{{ repo.owner.login }}">
+        </div>
+        <div class="mr-card-body">
+            <div class="mr-card-header">
+                <h3>{{ repo.name }}</h3>
+                <span class="gh-author">{{ repo.owner.login }}</span>
+            </div>
+            <p class="mr-desc">{{ (repo.description or 'Без описания')[:140] }}{% if repo.description and repo.description|length > 140 %}...{% endif %}</p>
+
+            {% if repo.topics %}
+            <div class="mr-categories">
+                {% for topic in repo.topics[:4] %}
+                    <span class="mr-tag gh-tag">{{ topic }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="mr-stats">
+                <span>⭐ {{ "{:,}".format(repo.stargazers_count).replace(",", " ") }}</span>
+                <span>🍴 {{ repo.forks_count }}</span>
+                {% if repo.language %}<span class="gh-lang">{{ repo.language }}</span>{% endif %}
+                <span>📅 {{ repo.updated_at[:10] }}</span>
+            </div>
+        </div>
+    </a>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h3>Ничего не найдено</h3>
+            <p>Попробуй другой запрос</p>
+        </div>
+    {% endfor %}
+</div>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}
+        <a href="{{ url_for('github_search', q=query, sort=sort, page=page-1) }}" class="page-btn">← Назад</a>
+    {% endif %}
+    <span class="page-info">Страница {{ page }} из {{ total_pages }}</span>
+    {% if page < total_pages %}
+        <a href="{{ url_for('github_search', q=query, sort=sort, page=page+1) }}" class="page-btn">Вперёд →</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="modrinth-credits">
+    Данные предоставлены <a href="https://github.com" target="_blank">GitHub</a>
+</div>
+{% endblock %}
