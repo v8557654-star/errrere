@@ -776,26 +776,11 @@ def modrinth_project(slug):
 
 @app.route('/modrinth/download')
 def modrinth_download():
-    """Скачивание файла с Modrinth через прокси (без перехода)"""
+    """Редирект на скачивание с Modrinth"""
     file_url = request.args.get('url', '')
-    filename = request.args.get('filename', 'mod.jar')
     if not file_url.startswith('https://cdn.modrinth.com'):
         abort(400)
-    try:
-        r = requests.get(file_url, stream=True, headers=MODRINTH_HEADERS, timeout=60)
-        if r.status_code != 200:
-            abort(404)
-        return Response(
-            stream_with_context(r.iter_content(chunk_size=8192)),
-            content_type='application/java-archive',
-            headers={
-                'Content-Disposition': f'attachment; filename="{filename}"',
-                'Content-Length': r.headers.get('Content-Length', ''),
-            }
-        )
-    except Exception as e:
-        flash(f'Ошибка скачивания: {str(e)}', 'error')
-        return redirect(url_for('modrinth_search'))
+    return redirect(file_url)
 
 with app.app_context():
     db.create_all()

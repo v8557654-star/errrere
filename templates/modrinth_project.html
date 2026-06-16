@@ -60,7 +60,7 @@
                 {% for v in versions[:10] %}
                     {% for f in v.files %}
                         {% if f.primary %}
-                        <a href="{{ url_for('modrinth_download', url=f.url, filename=f.filename) }}" class="mr-version-item">
+                        <a href="{{ f.url }}" class="mr-version-item" download target="_blank">
                             <div class="mr-v-info">
                                 <div class="mr-v-name">{{ v.name }}</div>
                                 <div class="mr-v-meta">
