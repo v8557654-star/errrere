@@ -667,4 +667,8 @@ print("   git push")
 print("\nЗатем на PythonAnywhere в Bash:")
 print("   cd ~/mysite")
 print("   git pull")
+<<<<<<< HEAD
 print("\nИ нажми Reload на вкладке Web")
+=======
+print("\nИ нажми Reload на вкладке Web")
+>>>>>>> c3df891ffda71fe2072d1bab5aca39c78b89efbc

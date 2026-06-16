@@ -973,3 +973,207 @@ body {
     .form-row { grid-template-columns: 1fr; }
     .profile-header { flex-direction: column; text-align: center; }
 }
+
+
+/* ===== TOP SECTION ===== */
+.top-section {
+    margin-bottom: 32px;
+}
+
+.top-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.top-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.top-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gradient);
+}
+
+.top-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+}
+
+.top-rank {
+    font-size: 32px;
+    font-weight: 900;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    min-width: 60px;
+}
+
+.top-card.top-1 .top-rank { font-size: 40px; }
+
+.top-info { flex: 1; }
+
+.top-info h3 {
+    font-size: 16px;
+    margin: 6px 0;
+}
+
+.top-stats {
+    display: flex;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ===== SORT TABS ===== */
+.sort-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.sort-tab {
+    padding: 10px 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.sort-tab:hover {
+    color: var(--text-main);
+    border-color: var(--accent);
+}
+
+.sort-tab.active {
+    background: var(--gradient);
+    color: #0f1626;
+    border-color: transparent;
+}
+
+/* ===== TAGS ===== */
+.mod-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+}
+
+.tag {
+    padding: 3px 10px;
+    background: rgba(34, 255, 136, 0.1);
+    color: var(--accent);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.tags-container {
+    background: var(--bg-card);
+    padding: 16px;
+    border-radius: 12px;
+    margin: 16px 0;
+}
+
+.tags-container h3 {
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.tags-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ===== MOD STATS ===== */
+.mod-stats {
+    display: flex;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.stat-item {
+    font-weight: 600;
+}
+
+/* ===== LIKE BUTTON ===== */
+.btn-like {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    font-size: 15px;
+}
+
+.btn-like:hover {
+    border-color: #ff4757;
+    transform: translateY(-2px);
+}
+
+.btn-like.liked {
+    background: linear-gradient(135deg, #ff4757, #ff6b81);
+    color: white;
+    border-color: transparent;
+}
+
+.btn-like .like-icon {
+    font-size: 20px;
+}
+
+.btn-like .like-count {
+    background: rgba(255,255,255,0.2);
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.btn-like.liked .like-icon {
+    animation: heartBeat 0.6s;
+}
+
+@keyframes heartBeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.3); }
+    50% { transform: scale(0.9); }
+    75% { transform: scale(1.15); }
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+    .top-grid { grid-template-columns: 1fr; }
+}

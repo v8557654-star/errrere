@@ -5,9 +5,11 @@
         <span class="mod-category">{{ mod.category }}</span>
         <h1>{{ mod.title }}</h1>
         <div class="mod-meta-row">
-            <span>👤 {{ mod.author.username }}</span>
+            <span>👤 <a href="#" class="author-link">{{ mod.author.username }}</a></span>
             <span>📅 {{ mod.created_at.strftime('%d.%m.%Y') }}</span>
             <span>⬇ {{ mod.downloads }}</span>
+            <span>❤ {{ mod.likes_count }}</span>
+            <span>👁 {{ mod.views or 0 }}</span>
         </div>
     </div>
 
@@ -18,7 +20,20 @@
                 <tr><td>Minecraft</td><td><strong>{{ mod.mc_version }}</strong></td></tr>
                 <tr><td>Категория</td><td><strong>{{ mod.category }}</strong></td></tr>
                 <tr><td>Скачиваний</td><td><strong>{{ mod.downloads }}</strong></td></tr>
+                <tr><td>Просмотров</td><td><strong>{{ mod.views or 0 }}</strong></td></tr>
+                <tr><td>Лайков</td><td><strong>{{ mod.likes_count }}</strong></td></tr>
             </table>
+
+            {% if mod.tags_list %}
+            <div class="tags-container">
+                <h3>🏷️ Теги</h3>
+                <div class="tags-row">
+                    {% for tag in mod.tags_list %}
+                        <span class="tag">#{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
 
             <div class="mod-description">
                 <h3>📖 Описание</h3>
@@ -30,6 +45,22 @@
             <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download-big">
                 ⬇ Скачать .jar
             </a>
+
+            {% if current_user.is_authenticated %}
+            <button class="btn-like {% if mod.is_liked_by(current_user) %}liked{% endif %}"
+                    onclick="toggleLike({{ mod.id }})" id="likeBtn">
+                <span class="like-icon">{% if mod.is_liked_by(current_user) %}❤{% else %}🤍{% endif %}</span>
+                <span class="like-text">
+                    {% if mod.is_liked_by(current_user) %}В избранном{% else %}Лайкнуть{% endif %}
+                </span>
+                <span class="like-count">{{ mod.likes_count }}</span>
+            </button>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="btn-like">
+                <span>🤍</span> Войди чтобы лайкнуть
+            </a>
+            {% endif %}
+
             <div class="mod-quick-info">
                 <div class="qi-row">
                     <span>Автор</span>
@@ -43,4 +74,33 @@
         </div>
     </div>
 </div>
+
+<script>
+async function toggleLike(modId) {
+    try {
+        const response = await fetch(`/like/${modId}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        const data = await response.json();
+        const btn = document.getElementById('likeBtn');
+        const icon = btn.querySelector('.like-icon');
+        const text = btn.querySelector('.like-text');
+        const count = btn.querySelector('.like-count');
+
+        if (data.liked) {
+            btn.classList.add('liked');
+            icon.textContent = '❤';
+            text.textContent = 'В избранном';
+        } else {
+            btn.classList.remove('liked');
+            icon.textContent = '🤍';
+            text.textContent = 'Лайкнуть';
+        }
+        count.textContent = data.count;
+    } catch(e) {
+        alert('Ошибка');
+    }
+}
+</script>
 {% endblock %}

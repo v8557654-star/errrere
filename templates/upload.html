@@ -7,8 +7,10 @@
     <form method="POST" enctype="multipart/form-data">
         <label>Название мода</label>
         <input type="text" name="title" placeholder="Например: Magic Wands" required>
+
         <label>Описание</label>
         <textarea name="description" placeholder="Расскажи что делает мод..." rows="5" required></textarea>
+
         <div class="form-row">
             <div>
                 <label>Версия мода</label>
@@ -24,6 +26,7 @@
                 </select>
             </div>
         </div>
+
         <label>Категория</label>
         <select name="category" required>
             <option value="">Выбери категорию</option>
@@ -31,6 +34,10 @@
                 <option value="{{ cat }}">{{ cat }}</option>
             {% endfor %}
         </select>
+
+        <label>Теги (через запятую)</label>
+        <input type="text" name="tags" placeholder="магия, оружие, рпг, выживание">
+
         <label class="file-label">
             <div class="file-icon">📁</div>
             <div class="file-text">Выбери .jar файл</div>

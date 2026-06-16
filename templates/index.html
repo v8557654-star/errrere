@@ -1,5 +1,28 @@
 {% extends 'base.html' %}
 {% block content %}
+
+{% if top_mods %}
+<div class="top-section">
+    <h2 class="section-title">🏆 Топ модов</h2>
+    <div class="top-grid">
+        {% for mod in top_mods %}
+        <a href="{{ url_for('mod_page', mod_id=mod.id) }}" class="top-card top-{{ loop.index }}">
+            <div class="top-rank">#{{ loop.index }}</div>
+            <div class="top-info">
+                <div class="mod-category">{{ mod.category }}</div>
+                <h3>{{ mod.title }}</h3>
+                <div class="top-stats">
+                    <span>⬇ {{ mod.downloads }}</span>
+                    <span>❤ {{ mod.likes_count }}</span>
+                    <span>👁 {{ mod.views or 0 }}</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 <div class="page-header">
     <div>
         <h1 class="page-title">Каталог модов</h1>
@@ -17,7 +40,7 @@
     <form method="GET" action="{{ url_for('index') }}">
         <div class="search-input-wrap">
             <span class="search-icon">🔍</span>
-            <input type="text" name="q" placeholder="Поиск модов..." value="{{ search }}">
+            <input type="text" name="q" placeholder="Поиск по названию, описанию, тегам..." value="{{ search }}">
         </div>
         <select name="category">
             <option value="">Все категории</option>
@@ -31,8 +54,20 @@
                 <option value="{{ v }}" {% if sel_version == v %}selected{% endif %}>{{ v }}</option>
             {% endfor %}
         </select>
+        <input type="hidden" name="sort" value="{{ sort }}">
         <button type="submit">Найти</button>
     </form>
+</div>
+
+<div class="sort-tabs">
+    <a href="{{ url_for('index', q=search, category=sel_category, mc_version=sel_version, sort='new') }}"
+       class="sort-tab {% if sort == 'new' %}active{% endif %}">🆕 Новые</a>
+    <a href="{{ url_for('index', q=search, category=sel_category, mc_version=sel_version, sort='popular') }}"
+       class="sort-tab {% if sort == 'popular' %}active{% endif %}">🔥 Популярные</a>
+    <a href="{{ url_for('index', q=search, category=sel_category, mc_version=sel_version, sort='top') }}"
+       class="sort-tab {% if sort == 'top' %}active{% endif %}">⭐ Лучшие</a>
+    <a href="{{ url_for('index', q=search, category=sel_category, mc_version=sel_version, sort='views') }}"
+       class="sort-tab {% if sort == 'views' %}active{% endif %}">👁 Просмотры</a>
 </div>
 
 <div class="mods-grid">
@@ -49,16 +84,29 @@
             <span>👤 {{ mod.author.username }}</span>
         </p>
         <p class="mod-desc">{{ mod.description[:120] }}{% if mod.description|length > 120 %}...{% endif %}</p>
+
+        {% if mod.tags_list %}
+        <div class="mod-tags">
+            {% for tag in mod.tags_list[:3] %}
+                <span class="tag">#{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <div class="mod-footer">
-            <span class="downloads-count">⬇ {{ mod.downloads }}</span>
+            <div class="mod-stats">
+                <span class="stat-item">⬇ {{ mod.downloads }}</span>
+                <span class="stat-item">❤ {{ mod.likes_count }}</span>
+                <span class="stat-item">👁 {{ mod.views or 0 }}</span>
+            </div>
             <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download">Скачать</a>
         </div>
     </div>
     {% else %}
         <div class="empty-state">
             <div class="empty-icon">📦</div>
-            <h3>Пока нет модов</h3>
-            <p>Будь первым, кто загрузит мод!</p>
+            <h3>Ничего не найдено</h3>
+            <p>Попробуй изменить параметры поиска</p>
         </div>
     {% endfor %}
 </div>
