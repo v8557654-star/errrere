@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -12,6 +12,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_secret_key_change_in_production_12345'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mods.db'
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['SCREENSHOTS_FOLDER'] = 'static/screenshots'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
 db = SQLAlchemy(app)
@@ -19,6 +20,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['SCREENSHOTS_FOLDER'], exist_ok=True)
 
 # ===== МОДЕЛИ =====
 class User(UserMixin, db.Model):
@@ -32,6 +34,7 @@ class User(UserMixin, db.Model):
     bio = db.Column(db.String(300), default='')
     mods = db.relationship('Mod', backref='author', lazy=True)
     likes = db.relationship('Like', backref='user', lazy=True)
+    comments = db.relationship('Comment', backref='user', lazy=True, cascade='all, delete-orphan')
 
 class Mod(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -44,17 +47,27 @@ class Mod(db.Model):
     downloads = db.Column(db.Integer, default=0)
     views = db.Column(db.Integer, default=0)
     tags = db.Column(db.String(300), default='')
+    screenshots = db.Column(db.Text, default='')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     likes = db.relationship('Like', backref='mod', lazy=True, cascade='all, delete-orphan')
+    comments = db.relationship('Comment', backref='mod', lazy=True, cascade='all, delete-orphan')
 
     @property
     def likes_count(self):
         return len(self.likes)
 
     @property
+    def comments_count(self):
+        return len(self.comments)
+
+    @property
     def tags_list(self):
         return [t.strip() for t in self.tags.split(',') if t.strip()] if self.tags else []
+
+    @property
+    def screenshots_list(self):
+        return [s.strip() for s in self.screenshots.split(',') if s.strip()] if self.screenshots else []
 
     def is_liked_by(self, user):
         if not user or not user.is_authenticated:
@@ -67,12 +80,22 @@ class Like(db.Model):
     mod_id = db.Column(db.Integer, db.ForeignKey('mod.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.Text, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    mod_id = db.Column(db.Integer, db.ForeignKey('mod.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 def allowed_file(filename):
     return filename.lower().endswith('.jar')
+
+def allowed_image(filename):
+    return filename.lower().rsplit('.', 1)[-1] in {'jpg', 'jpeg', 'png', 'gif', 'webp'}
 
 @app.context_processor
 def inject_theme():
@@ -86,10 +109,9 @@ def index():
     search = request.args.get('q', '')
     category = request.args.get('category', '')
     mc_version = request.args.get('mc_version', '')
-    sort = request.args.get('sort', 'new')  # new, popular, top
+    sort = request.args.get('sort', 'new')
 
     query = Mod.query
-
     if search:
         query = query.filter(or_(
             Mod.title.ilike(f'%{search}%'),
@@ -102,7 +124,6 @@ def index():
     if sort == 'popular':
         query = query.order_by(Mod.downloads.desc())
     elif sort == 'top':
-        # Сортировка по лайкам
         query = query.outerjoin(Like).group_by(Mod.id).order_by(func.count(Like.id).desc())
     elif sort == 'views':
         query = query.order_by(Mod.views.desc())
@@ -110,8 +131,6 @@ def index():
         query = query.order_by(Mod.created_at.desc())
 
     mods = query.all()
-
-    # Топ-3 мода для главной
     top_mods = Mod.query.order_by(Mod.downloads.desc()).limit(3).all() if not search and not category and not mc_version else []
 
     categories = ['Магия', 'Техника', 'Оружие', 'Мобы', 'Декор', 'Еда', 'Миры', 'Утилиты', 'Другое']
@@ -136,7 +155,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         login_user(user)
-        flash('Регистрация успешна! Добро пожаловать!', 'success')
+        flash('Регистрация успешна!', 'success')
         return redirect(url_for('index'))
     return render_template('register.html')
 
@@ -170,6 +189,17 @@ def upload():
         filename = secure_filename(file.filename)
         unique_name = f"{current_user.id}_{int(datetime.utcnow().timestamp())}_{filename}"
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_name))
+
+        # Скриншоты
+        screenshots = []
+        for i in range(1, 6):
+            screenshot = request.files.get(f'screenshot{i}')
+            if screenshot and screenshot.filename and allowed_image(screenshot.filename):
+                ext = screenshot.filename.rsplit('.', 1)[-1].lower()
+                ss_name = f"{current_user.id}_{int(datetime.utcnow().timestamp())}_{i}.{ext}"
+                screenshot.save(os.path.join(app.config['SCREENSHOTS_FOLDER'], ss_name))
+                screenshots.append(ss_name)
+
         mod = Mod(
             title=request.form['title'],
             description=request.form['description'],
@@ -177,6 +207,7 @@ def upload():
             mc_version=request.form['mc_version'],
             category=request.form['category'],
             tags=request.form.get('tags', ''),
+            screenshots=','.join(screenshots),
             filename=unique_name,
             user_id=current_user.id
         )
@@ -189,10 +220,47 @@ def upload():
 @app.route('/mod/<int:mod_id>')
 def mod_page(mod_id):
     mod = Mod.query.get_or_404(mod_id)
-    # Увеличиваем счётчик просмотров
     mod.views = (mod.views or 0) + 1
     db.session.commit()
-    return render_template('mod.html', mod=mod)
+    comments = Comment.query.filter_by(mod_id=mod_id).order_by(Comment.created_at.desc()).all()
+    return render_template('mod.html', mod=mod, comments=comments)
+
+@app.route('/mod/<int:mod_id>/comment', methods=['POST'])
+@login_required
+def add_comment(mod_id):
+    mod = Mod.query.get_or_404(mod_id)
+    text = request.form.get('text', '').strip()
+    if not text:
+        flash('Комментарий не может быть пустым', 'error')
+        return redirect(url_for('mod_page', mod_id=mod_id))
+    if len(text) > 1000:
+        flash('Слишком длинный комментарий (макс 1000)', 'error')
+        return redirect(url_for('mod_page', mod_id=mod_id))
+    comment = Comment(text=text, user_id=current_user.id, mod_id=mod_id)
+    db.session.add(comment)
+    db.session.commit()
+    return redirect(url_for('mod_page', mod_id=mod_id) + '#comments')
+
+@app.route('/comment/<int:comment_id>/delete', methods=['POST'])
+@login_required
+def delete_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    mod_id = comment.mod_id
+    if comment.user_id != current_user.id and comment.mod.user_id != current_user.id:
+        abort(403)
+    db.session.delete(comment)
+    db.session.commit()
+    return redirect(url_for('mod_page', mod_id=mod_id) + '#comments')
+
+@app.route('/user/<username>')
+def user_page(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    mods = Mod.query.filter_by(user_id=user.id).order_by(Mod.created_at.desc()).all()
+    total_likes = sum(m.likes_count for m in mods)
+    total_views = sum(m.views or 0 for m in mods)
+    total_downloads = sum(m.downloads for m in mods)
+    return render_template('user.html', user=user, mods=mods,
+                           total_likes=total_likes, total_views=total_views, total_downloads=total_downloads)
 
 @app.route('/download/<int:mod_id>')
 def download(mod_id):
@@ -231,8 +299,7 @@ def settings():
     if request.method == 'POST':
         action = request.form.get('action')
         if action == 'theme':
-            theme = request.form.get('theme', 'green')
-            current_user.theme = theme
+            current_user.theme = request.form.get('theme', 'green')
             db.session.commit()
             flash('Тема изменена!', 'success')
         elif action == 'animations':
@@ -272,6 +339,11 @@ def delete_mod(mod_id):
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], mod.filename)
     if os.path.exists(filepath):
         os.remove(filepath)
+    # Удаляем скриншоты
+    for ss in mod.screenshots_list:
+        ss_path = os.path.join(app.config['SCREENSHOTS_FOLDER'], ss)
+        if os.path.exists(ss_path):
+            os.remove(ss_path)
     db.session.delete(mod)
     db.session.commit()
     flash('Мод удалён', 'success')
@@ -279,7 +351,6 @@ def delete_mod(mod_id):
 
 with app.app_context():
     db.create_all()
-    # Миграции
     try:
         with db.engine.connect() as conn:
             for sql in [
@@ -288,6 +359,7 @@ with app.app_context():
                 "ALTER TABLE user ADD COLUMN bio VARCHAR(300) DEFAULT ''",
                 "ALTER TABLE mod ADD COLUMN views INTEGER DEFAULT 0",
                 "ALTER TABLE mod ADD COLUMN tags VARCHAR(300) DEFAULT ''",
+                "ALTER TABLE mod ADD COLUMN screenshots TEXT DEFAULT ''",
             ]:
                 try: conn.execute(text(sql))
                 except: pass

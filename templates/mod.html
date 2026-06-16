@@ -5,13 +5,27 @@
         <span class="mod-category">{{ mod.category }}</span>
         <h1>{{ mod.title }}</h1>
         <div class="mod-meta-row">
-            <span>👤 <a href="#" class="author-link">{{ mod.author.username }}</a></span>
+            <span>👤 <a href="{{ url_for('user_page', username=mod.author.username) }}" class="author-link">{{ mod.author.username }}</a></span>
             <span>📅 {{ mod.created_at.strftime('%d.%m.%Y') }}</span>
             <span>⬇ {{ mod.downloads }}</span>
             <span>❤ {{ mod.likes_count }}</span>
             <span>👁 {{ mod.views or 0 }}</span>
+            <span>💬 {{ mod.comments_count }}</span>
         </div>
     </div>
+
+    {% if mod.screenshots_list %}
+    <div class="screenshots-section">
+        <h3>📸 Скриншоты</h3>
+        <div class="screenshots-grid">
+            {% for ss in mod.screenshots_list %}
+                <img src="{{ url_for('static', filename='screenshots/' + ss) }}"
+                     alt="Screenshot" class="screenshot"
+                     onclick="openLightbox('{{ url_for('static', filename='screenshots/' + ss) }}')">
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 
     <div class="mod-detail-grid">
         <div class="mod-detail-info">
@@ -45,14 +59,11 @@
             <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download-big">
                 ⬇ Скачать .jar
             </a>
-
             {% if current_user.is_authenticated %}
             <button class="btn-like {% if mod.is_liked_by(current_user) %}liked{% endif %}"
                     onclick="toggleLike({{ mod.id }})" id="likeBtn">
                 <span class="like-icon">{% if mod.is_liked_by(current_user) %}❤{% else %}🤍{% endif %}</span>
-                <span class="like-text">
-                    {% if mod.is_liked_by(current_user) %}В избранном{% else %}Лайкнуть{% endif %}
-                </span>
+                <span class="like-text">{% if mod.is_liked_by(current_user) %}В избранном{% else %}Лайкнуть{% endif %}</span>
                 <span class="like-count">{{ mod.likes_count }}</span>
             </button>
             {% else %}
@@ -64,7 +75,7 @@
             <div class="mod-quick-info">
                 <div class="qi-row">
                     <span>Автор</span>
-                    <strong>{{ mod.author.username }}</strong>
+                    <a href="{{ url_for('user_page', username=mod.author.username) }}" class="author-link"><strong>{{ mod.author.username }}</strong></a>
                 </div>
                 <div class="qi-row">
                     <span>Опубликовано</span>
@@ -73,21 +84,61 @@
             </div>
         </div>
     </div>
+
+    <div class="comments-section" id="comments">
+        <h3>💬 Комментарии ({{ comments|length }})</h3>
+
+        {% if current_user.is_authenticated %}
+        <form method="POST" action="{{ url_for('add_comment', mod_id=mod.id) }}" class="comment-form">
+            <textarea name="text" placeholder="Напиши комментарий..." rows="3" required maxlength="1000"></textarea>
+            <button type="submit">Отправить</button>
+        </form>
+        {% else %}
+        <div class="login-to-comment">
+            <a href="{{ url_for('login') }}">Войди</a> чтобы оставить комментарий
+        </div>
+        {% endif %}
+
+        <div class="comments-list">
+            {% for comment in comments %}
+            <div class="comment">
+                <div class="comment-avatar">{{ comment.user.username[0]|upper }}</div>
+                <div class="comment-body">
+                    <div class="comment-header">
+                        <a href="{{ url_for('user_page', username=comment.user.username) }}" class="comment-author">
+                            {{ comment.user.username }}
+                        </a>
+                        <span class="comment-date">{{ comment.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                    </div>
+                    <div class="comment-text">{{ comment.text }}</div>
+                    {% if current_user.is_authenticated and (current_user.id == comment.user_id or current_user.id == mod.user_id) %}
+                    <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}" style="display:inline">
+                        <button type="submit" class="comment-delete" onclick="return confirm('Удалить комментарий?')">🗑</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="no-comments">Пока нет комментариев. Будь первым!</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="">
+    <span class="lightbox-close">&times;</span>
 </div>
 
 <script>
 async function toggleLike(modId) {
     try {
-        const response = await fetch(`/like/${modId}`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'}
-        });
+        const response = await fetch(`/like/${modId}`, {method: 'POST'});
         const data = await response.json();
         const btn = document.getElementById('likeBtn');
         const icon = btn.querySelector('.like-icon');
         const text = btn.querySelector('.like-text');
         const count = btn.querySelector('.like-count');
-
         if (data.liked) {
             btn.classList.add('liked');
             icon.textContent = '❤';
@@ -98,9 +149,16 @@ async function toggleLike(modId) {
             text.textContent = 'Лайкнуть';
         }
         count.textContent = data.count;
-    } catch(e) {
-        alert('Ошибка');
-    }
+    } catch(e) { alert('Ошибка'); }
+}
+
+function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox').classList.add('active');
+}
+
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
 }
 </script>
 {% endblock %}

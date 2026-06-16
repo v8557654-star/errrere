@@ -44,6 +44,17 @@
             <div class="file-hint">Максимум 50 МБ</div>
             <input type="file" name="mod_file" accept=".jar" required>
         </label>
+
+        <label>📸 Скриншоты (необязательно, до 5)</label>
+        <div class="screenshots-upload">
+            {% for i in range(1, 6) %}
+            <label class="ss-upload-box">
+                <span>📷 {{ i }}</span>
+                <input type="file" name="screenshot{{ i }}" accept="image/*">
+            </label>
+            {% endfor %}
+        </div>
+
         <button type="submit">🚀 Опубликовать мод</button>
     </form>
 </div>

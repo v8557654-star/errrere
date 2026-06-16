@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="profile-header">
+    <div class="profile-avatar-big">{{ user.username[0]|upper }}</div>
+    <div>
+        <h1>{{ user.username }}</h1>
+        {% if user.bio %}
+            <p class="profile-bio">{{ user.bio }}</p>
+        {% endif %}
+        <p class="profile-date">📅 С нами с {{ user.created_at.strftime('%d.%m.%Y') }}</p>
+    </div>
+</div>
+
+<div class="profile-stats">
+    <div class="stat-card">
+        <div class="stat-num">{{ mods|length }}</div>
+        <div class="stat-label">📦 Модов</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ total_downloads }}</div>
+        <div class="stat-label">⬇ Скачиваний</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ total_likes }}</div>
+        <div class="stat-label">❤ Лайков</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ total_views }}</div>
+        <div class="stat-label">👁 Просмотров</div>
+    </div>
+</div>
+
+<h3 class="section-title">📦 Моды автора</h3>
+
+<div class="mods-grid">
+    {% for mod in mods %}
+    <div class="mod-card">
+        <div class="mod-card-header">
+            <div class="mod-category">{{ mod.category }}</div>
+            <div class="mod-mc-badge">MC {{ mod.mc_version }}</div>
+        </div>
+        <h3><a href="{{ url_for('mod_page', mod_id=mod.id) }}">{{ mod.title }}</a></h3>
+        <p class="mod-meta"><span>v{{ mod.version }}</span></p>
+        <p class="mod-desc">{{ mod.description[:120] }}{% if mod.description|length > 120 %}...{% endif %}</p>
+        <div class="mod-footer">
+            <div class="mod-stats">
+                <span>⬇ {{ mod.downloads }}</span>
+                <span>❤ {{ mod.likes_count }}</span>
+                <span>👁 {{ mod.views or 0 }}</span>
+            </div>
+            <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download">Скачать</a>
+        </div>
+    </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h3>У автора пока нет модов</h3>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
