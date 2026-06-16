@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="form-page form-wide">
+    <h2>📤 Загрузить мод</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Название мода" required>
+        <textarea name="description" placeholder="Описание мода..." rows="5" required></textarea>
+        <input type="text" name="version" placeholder="Версия мода (например 1.0)" required>
+        <select name="mc_version" required>
+            <option value="">Версия Minecraft</option>
+            {% for v in versions %}
+                <option value="{{ v }}">{{ v }}</option>
+            {% endfor %}
+        </select>
+        <select name="category" required>
+            <option value="">Категория</option>
+            {% for cat in categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+            {% endfor %}
+        </select>
+        <label class="file-label">
+            📁 Выберите .jar файл (макс 50 МБ)
+            <input type="file" name="mod_file" accept=".jar" required>
+        </label>
+        <button type="submit">Опубликовать</button>
+    </form>
+</div>
+{% endblock %}

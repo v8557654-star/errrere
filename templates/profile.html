@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="profile-page">
+    <h2>👤 {{ current_user.username }}</h2>
+    <p>Email: {{ current_user.email }}</p>
+    <p>Зарегистрирован: {{ current_user.created_at.strftime('%d.%m.%Y') }}</p>
+
+    <h3>Мои моды ({{ mods|length }})</h3>
+
+    {% for mod in mods %}
+    <div class="my-mod">
+        <a href="{{ url_for('mod_page', mod_id=mod.id) }}">{{ mod.title }}</a>
+        <span>⬇ {{ mod.downloads }}</span>
+        <form method="POST" action="{{ url_for('delete_mod', mod_id=mod.id) }}" style="display:inline">
+            <button type="submit" class="btn-delete" onclick="return confirm('Удалить мод?')">🗑</button>
+        </form>
+    </div>
+    {% else %}
+        <p>Вы ещё не загрузили ни одного мода</p>
+    {% endfor %}
+</div>
+{% endblock %}

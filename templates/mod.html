@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mod-detail">
+    <div class="mod-header">
+        <span class="mod-category">{{ mod.category }}</span>
+        <h1>{{ mod.title }}</h1>
+        <p class="mod-meta">
+            👤 {{ mod.author.username }} ·
+            📅 {{ mod.created_at.strftime('%d.%m.%Y') }} ·
+            ⬇ {{ mod.downloads }} скачиваний
+        </p>
+    </div>
+
+    <div class="mod-info">
+        <table>
+            <tr><td>Версия мода</td><td>{{ mod.version }}</td></tr>
+            <tr><td>Minecraft</td><td>{{ mod.mc_version }}</td></tr>
+            <tr><td>Категория</td><td>{{ mod.category }}</td></tr>
+        </table>
+    </div>
+
+    <div class="mod-description">
+        <h3>Описание</h3>
+        <p>{{ mod.description }}</p>
+    </div>
+
+    <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download-big">⬇ Скачать .jar</a>
+</div>
+{% endblock %}

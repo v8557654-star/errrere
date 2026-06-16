@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="hero">
+    <h1>🎮 Моды для Minecraft</h1>
+    <p>Находи, скачивай и публикуй моды</p>
+</div>
+
+<div class="search-bar">
+    <form method="GET" action="{{ url_for('index') }}">
+        <input type="text" name="q" placeholder="🔍 Поиск модов..." value="{{ search }}">
+        <select name="category">
+            <option value="">Все категории</option>
+            {% for cat in categories %}
+                <option value="{{ cat }}" {% if sel_category == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+        </select>
+        <select name="mc_version">
+            <option value="">Все версии</option>
+            {% for v in versions %}
+                <option value="{{ v }}" {% if sel_version == v %}selected{% endif %}>{{ v }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Найти</button>
+    </form>
+</div>
+
+<div class="mods-grid">
+    {% for mod in mods %}
+    <div class="mod-card">
+        <div class="mod-category">{{ mod.category }}</div>
+        <h3><a href="{{ url_for('mod_page', mod_id=mod.id) }}">{{ mod.title }}</a></h3>
+        <p class="mod-meta">MC {{ mod.mc_version }} · v{{ mod.version }} · 👤 {{ mod.author.username }}</p>
+        <p class="mod-desc">{{ mod.description[:120] }}{% if mod.description|length > 120 %}...{% endif %}</p>
+        <div class="mod-footer">
+            <span>⬇ {{ mod.downloads }}</span>
+            <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download">Скачать</a>
+        </div>
+    </div>
+    {% else %}
+        <p class="no-mods">Пока нет ни одного мода. Будь первым! 🚀</p>
+    {% endfor %}
+</div>
+{% endblock %}
