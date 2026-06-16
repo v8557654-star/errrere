@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from sqlalchemy import func, or_, and_, text
 from functools import wraps
+import requests
 
 ADMIN_USERNAME = 'nehea664'
 
@@ -679,6 +680,108 @@ def admin_delete_news(news_id):
     db.session.delete(n); db.session.commit()
     flash('Новость удалена', 'success')
     return redirect(url_for('admin_news'))
+
+
+# ===== MODRINTH API =====
+MODRINTH_API = "https://api.modrinth.com/v2"
+MODRINTH_HEADERS = {"User-Agent": "MineMods/1.0 (contact@minemods.local)"}
+
+@app.route('/modrinth')
+def modrinth_search():
+    query = request.args.get('q', '')
+    mc_version = request.args.get('mc_version', '')
+    category = request.args.get('category', '')
+    sort = request.args.get('sort', 'relevance')  # relevance, downloads, follows, newest, updated
+    page = int(request.args.get('page', 1))
+    limit = 20
+    offset = (page - 1) * limit
+
+    # Формируем facets для фильтров
+    facets = [["project_type:mod"]]
+    if mc_version:
+        facets.append([f"versions:{mc_version}"])
+    if category:
+        facets.append([f"categories:{category}"])
+
+    params = {
+        'query': query,
+        'facets': str(facets).replace("'", '"'),
+        'limit': limit,
+        'offset': offset,
+        'index': sort,
+    }
+
+    try:
+        r = requests.get(f"{MODRINTH_API}/search", params=params, headers=MODRINTH_HEADERS, timeout=10)
+        data = r.json()
+        results = data.get('hits', [])
+        total = data.get('total_hits', 0)
+    except Exception as e:
+        results = []
+        total = 0
+        flash(f'Ошибка соединения с Modrinth: {str(e)}', 'error')
+
+    # Категории Modrinth
+    mr_categories = [
+        ('adventure', 'Приключения 🗺️'),
+        ('cursed', 'Проклятые 👻'),
+        ('decoration', 'Декор 🪴'),
+        ('economy', 'Экономика 💰'),
+        ('equipment', 'Снаряжение ⚔️'),
+        ('food', 'Еда 🍖'),
+        ('game-mechanics', 'Механики 🎮'),
+        ('library', 'Библиотеки 📚'),
+        ('magic', 'Магия ✨'),
+        ('management', 'Менеджмент 📊'),
+        ('minigame', 'Мини-игры 🎯'),
+        ('mobs', 'Мобы 🐺'),
+        ('optimization', 'Оптимизация ⚡'),
+        ('social', 'Социальные 💬'),
+        ('storage', 'Хранение 📦'),
+        ('technology', 'Технологии ⚙️'),
+        ('transportation', 'Транспорт 🚗'),
+        ('utility', 'Утилиты 🔧'),
+        ('worldgen', 'Генерация миров 🌍'),
+    ]
+
+    versions = ['1.21.4', '1.21.3', '1.21.1', '1.21', '1.20.6', '1.20.4', '1.20.2', '1.20.1',
+                '1.19.4', '1.19.2', '1.18.2', '1.17.1', '1.16.5', '1.12.2', '1.8.9', '1.7.10']
+
+    total_pages = (total + limit - 1) // limit if total else 1
+
+    return render_template('modrinth_search.html',
+        results=results, query=query, mc_version=mc_version, category=category,
+        sort=sort, page=page, total=total, total_pages=total_pages,
+        mr_categories=mr_categories, versions=versions)
+
+@app.route('/modrinth/project/<slug>')
+def modrinth_project(slug):
+    try:
+        # Информация о проекте
+        r = requests.get(f"{MODRINTH_API}/project/{slug}", headers=MODRINTH_HEADERS, timeout=10)
+        if r.status_code != 200:
+            flash('Мод не найден на Modrinth', 'error')
+            return redirect(url_for('modrinth_search'))
+        project = r.json()
+
+        # Версии мода
+        v = requests.get(f"{MODRINTH_API}/project/{slug}/version", headers=MODRINTH_HEADERS, timeout=10)
+        versions_list = v.json() if v.status_code == 200 else []
+
+    except Exception as e:
+        flash(f'Ошибка: {str(e)}', 'error')
+        return redirect(url_for('modrinth_search'))
+
+    return render_template('modrinth_project.html', project=project, versions=versions_list)
+
+@app.route('/modrinth/download')
+def modrinth_download():
+    """Прокси для скачивания файла с Modrinth"""
+    file_url = request.args.get('url', '')
+    filename = request.args.get('filename', 'mod.jar')
+    if not file_url.startswith('https://cdn.modrinth.com'):
+        abort(400)
+    return redirect(file_url)
 
 with app.app_context():
     db.create_all()

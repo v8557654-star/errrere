@@ -24,6 +24,9 @@
             <a href="{{ url_for('news_list') }}" class="nav-item">
                 <span class="nav-icon">📰</span><span>Новости</span>
             </a>
+            <a href="{{ url_for('modrinth_search') }}" class="nav-item modrinth-item">
+                <span class="nav-icon">🌍</span><span>Modrinth</span>
+            </a>
             {% if current_user.is_authenticated %}
             <a href="{{ url_for('feed') }}" class="nav-item">
                 <span class="nav-icon">📡</span><span>Подписки</span>

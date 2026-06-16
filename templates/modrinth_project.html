@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<a href="{{ url_for('modrinth_search') }}" class="back-btn">← К поиску Modrinth</a>
+
+<div class="mr-project">
+
+    <div class="mr-project-header">
+        <div class="mr-project-icon">
+            {% if project.icon_url %}
+                <img src="{{ project.icon_url }}" alt="{{ project.title }}">
+            {% else %}
+                <div class="mr-no-icon-big">📦</div>
+            {% endif %}
+        </div>
+        <div class="mr-project-info">
+            <h1>{{ project.title }}</h1>
+            <p class="mr-project-desc">{{ project.description }}</p>
+            <div class="mr-project-stats">
+                <span>⬇ {{ "{:,}".format(project.downloads).replace(",", " ") }}</span>
+                <span>⭐ {{ "{:,}".format(project.followers).replace(",", " ") }}</span>
+                <span>📅 {{ project.updated[:10] }}</span>
+            </div>
+
+            <div class="mr-project-categories">
+                {% for cat in project.categories %}
+                    <span class="mr-tag">{{ cat }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% if project.gallery %}
+    <div class="screenshots-section">
+        <h3>📸 Скриншоты</h3>
+        <div class="screenshots-grid">
+            {% for img in project.gallery[:6] %}
+                <img src="{{ img.url }}" alt="{{ img.title or 'Screenshot' }}"
+                     class="screenshot" onclick="openLightbox('{{ img.url }}')">
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="mr-project-grid">
+        <div class="mr-project-body">
+            <div class="mod-description">
+                <h3>📖 Описание</h3>
+                <div class="mr-body-content">{{ project.body|safe }}</div>
+            </div>
+        </div>
+
+        <div class="mr-project-sidebar">
+            <a href="https://modrinth.com/mod/{{ project.slug }}" target="_blank" class="btn-modrinth">
+                🌍 Открыть на Modrinth
+            </a>
+
+            <h3 class="mr-versions-title">📥 Скачать</h3>
+            <div class="mr-versions-list">
+                {% for v in versions[:10] %}
+                    {% for f in v.files %}
+                        {% if f.primary %}
+                        <a href="{{ f.url }}" class="mr-version-item" download>
+                            <div class="mr-v-info">
+                                <div class="mr-v-name">{{ v.name }}</div>
+                                <div class="mr-v-meta">
+                                    {% if v.game_versions %}
+                                    <span>MC {{ v.game_versions[0] }}</span>
+                                    {% endif %}
+                                    {% if v.loaders %}
+                                    <span>{{ v.loaders[0]|title }}</span>
+                                    {% endif %}
+                                    <span>⬇ {{ "{:,}".format(v.downloads).replace(",", " ") }}</span>
+                                </div>
+                            </div>
+                            <div class="mr-v-download">⬇</div>
+                        </a>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </div>
+
+            {% if project.source_url %}
+            <a href="{{ project.source_url }}" target="_blank" class="mr-extra-link">
+                <span>💻</span> Исходный код
+            </a>
+            {% endif %}
+            {% if project.wiki_url %}
+            <a href="{{ project.wiki_url }}" target="_blank" class="mr-extra-link">
+                <span>📚</span> Wiki
+            </a>
+            {% endif %}
+            {% if project.discord_url %}
+            <a href="{{ project.discord_url }}" target="_blank" class="mr-extra-link">
+                <span>💬</span> Discord
+            </a>
+            {% endif %}
+            {% if project.issues_url %}
+            <a href="{{ project.issues_url }}" target="_blank" class="mr-extra-link">
+                <span>🐛</span> Сообщить о баге
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="">
+    <span class="lightbox-close">&times;</span>
+</div>
+
+<script>
+function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="modrinth-header">
+    <div class="modrinth-logo">
+        <div class="mr-logo-icon">🌍</div>
+        <div>
+            <h1>Modrinth</h1>
+            <p>Поиск по миллионам модов</p>
+        </div>
+    </div>
+    <div class="modrinth-stats">
+        <strong>{{ total }}</strong> модов найдено
+    </div>
+</div>
+
+<div class="search-bar">
+    <form method="GET" action="{{ url_for('modrinth_search') }}">
+        <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" name="q" placeholder="Поиск модов на Modrinth..." value="{{ query }}" autofocus>
+        </div>
+        <select name="category">
+            <option value="">Все категории</option>
+            {% for slug, name in mr_categories %}
+                <option value="{{ slug }}" {% if category == slug %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+        </select>
+        <select name="mc_version">
+            <option value="">Все версии</option>
+            {% for v in versions %}
+                <option value="{{ v }}" {% if mc_version == v %}selected{% endif %}>{{ v }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Найти</button>
+    </form>
+</div>
+
+<div class="sort-tabs">
+    <a href="{{ url_for('modrinth_search', q=query, category=category, mc_version=mc_version, sort='relevance') }}"
+       class="sort-tab {% if sort == 'relevance' %}active{% endif %}">🎯 Релевантность</a>
+    <a href="{{ url_for('modrinth_search', q=query, category=category, mc_version=mc_version, sort='downloads') }}"
+       class="sort-tab {% if sort == 'downloads' %}active{% endif %}">🔥 Скачивания</a>
+    <a href="{{ url_for('modrinth_search', q=query, category=category, mc_version=mc_version, sort='follows') }}"
+       class="sort-tab {% if sort == 'follows' %}active{% endif %}">⭐ Подписчики</a>
+    <a href="{{ url_for('modrinth_search', q=query, category=category, mc_version=mc_version, sort='newest') }}"
+       class="sort-tab {% if sort == 'newest' %}active{% endif %}">🆕 Новые</a>
+    <a href="{{ url_for('modrinth_search', q=query, category=category, mc_version=mc_version, sort='updated') }}"
+       class="sort-tab {% if sort == 'updated' %}active{% endif %}">🔄 Обновлённые</a>
+</div>
+
+<div class="modrinth-grid">
+    {% for mod in results %}
+    <a href="{{ url_for('modrinth_project', slug=mod.slug) }}" class="mr-card">
+        <div class="mr-card-icon">
+            {% if mod.icon_url %}
+                <img src="{{ mod.icon_url }}" alt="{{ mod.title }}">
+            {% else %}
+                <div class="mr-no-icon">📦</div>
+            {% endif %}
+        </div>
+        <div class="mr-card-body">
+            <div class="mr-card-header">
+                <h3>{{ mod.title }}</h3>
+                <span class="mr-author">{{ mod.author }}</span>
+            </div>
+            <p class="mr-desc">{{ mod.description[:140] }}{% if mod.description|length > 140 %}...{% endif %}</p>
+
+            {% if mod.categories %}
+            <div class="mr-categories">
+                {% for cat in mod.categories[:4] %}
+                    <span class="mr-tag">{{ cat }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="mr-stats">
+                <span>⬇ {{ "{:,}".format(mod.downloads).replace(",", " ") }}</span>
+                <span>⭐ {{ "{:,}".format(mod.follows).replace(",", " ") }}</span>
+                {% if mod.versions %}
+                    <span class="mr-version">MC {{ mod.versions[-1] }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </a>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h3>Ничего не найдено</h3>
+            <p>Попробуй изменить запрос</p>
+        </div>
+    {% endfor %}
+</div>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}
+        <a href="{{ url_for('modrinth_search', q=query, category=category, mc_version=mc_version, sort=sort, page=page-1) }}" class="page-btn">← Назад</a>
+    {% endif %}
+
+    <span class="page-info">Страница {{ page }} из {{ total_pages }}</span>
+
+    {% if page < total_pages %}
+        <a href="{{ url_for('modrinth_search', q=query, category=category, mc_version=mc_version, sort=sort, page=page+1) }}" class="page-btn">Вперёд →</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="modrinth-credits">
+    Данные предоставлены <a href="https://modrinth.com" target="_blank">Modrinth</a>
+</div>
+{% endblock %}
