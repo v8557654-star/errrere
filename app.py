@@ -682,6 +682,60 @@ def admin_delete_news(news_id):
     return redirect(url_for('admin_news'))
 
 
+
+# ===== УТИЛИТЫ ДЛЯ ВЕРСИЙ =====
+import re as _re_versions
+
+def parse_mc_versions(versions_list):
+    """Извлекает версии Minecraft из списка (отсеивает loader и snapshot)"""
+    if not versions_list:
+        return []
+    mc_versions = []
+    for v in versions_list:
+        # Пропускаем не-MC версии (loader, snapshot и т.д.)
+        if any(x in str(v).lower() for x in ['forge-', 'fabric-', 'quilt-', 'neoforge-', 'snapshot', 'pre', 'rc']):
+            continue
+        # Берём только версии формата 1.X.X или 1.X
+        if _re_versions.match(r'^1\.\d+(\.\d+)?$', str(v)):
+            mc_versions.append(v)
+    return mc_versions
+
+def format_mc_versions(versions_list, max_show=3):
+    """Красиво форматирует список версий MC"""
+    mc = parse_mc_versions(versions_list)
+    if not mc:
+        return "—"
+    # Сортируем (новые впереди)
+    try:
+        mc_sorted = sorted(mc, key=lambda v: [int(x) for x in v.split('.')], reverse=True)
+    except:
+        mc_sorted = mc
+
+    if len(mc_sorted) <= max_show:
+        return ", ".join(mc_sorted)
+    return f"{mc_sorted[0]} ... {mc_sorted[-1]} ({len(mc_sorted)} версий)"
+
+def detect_mod_loader(versions_list, loaders_list=None):
+    """Определяет загрузчик (Forge/Fabric/Quilt)"""
+    loaders = set()
+    if loaders_list:
+        for l in loaders_list:
+            loaders.add(l.title())
+    if versions_list:
+        for v in versions_list:
+            vl = str(v).lower()
+            if 'forge' in vl: loaders.add('Forge')
+            if 'fabric' in vl: loaders.add('Fabric')
+            if 'quilt' in vl: loaders.add('Quilt')
+            if 'neoforge' in vl: loaders.add('NeoForge')
+    return list(loaders)
+
+# Делаем доступными в шаблонах
+app.jinja_env.globals['parse_mc_versions'] = parse_mc_versions
+app.jinja_env.globals['format_mc_versions'] = format_mc_versions
+app.jinja_env.globals['detect_mod_loader'] = detect_mod_loader
+
+
 # ===== MODRINTH API =====
 MODRINTH_API = "https://api.modrinth.com/v2"
 MODRINTH_HEADERS = {"User-Agent": "MineMods/1.0 (contact@minemods.local)"}

@@ -16,17 +16,48 @@
         <div class="mr-project-info">
             <h1>{{ project.title }}</h1>
             <p class="mr-project-desc">{{ project.description }}</p>
+
             <div class="mr-project-stats">
                 <span>⬇ {{ "{:,}".format(project.downloads).replace(",", " ") }}</span>
                 <span>⭐ {{ "{:,}".format(project.followers).replace(",", " ") }}</span>
                 <span>📅 {{ project.updated[:10] }}</span>
             </div>
 
+            <div class="project-versions-info">
+                {% if project.game_versions %}
+                <div class="pvi-block">
+                    <div class="pvi-label">🎮 Версии Minecraft</div>
+                    <div class="pvi-versions">
+                        {% set mc_sorted = parse_mc_versions(project.game_versions) %}
+                        {% for v in mc_sorted[:8] %}
+                            <span class="pvi-chip">MC {{ v }}</span>
+                        {% endfor %}
+                        {% if mc_sorted|length > 8 %}
+                            <span class="pvi-chip-more">+{{ mc_sorted|length - 8 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if project.loaders %}
+                <div class="pvi-block">
+                    <div class="pvi-label">⚙️ Загрузчики</div>
+                    <div class="pvi-versions">
+                        {% for l in project.loaders %}
+                            <span class="pvi-chip pvi-loader">{{ l|title }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if project.categories %}
             <div class="mr-project-categories">
                 {% for cat in project.categories %}
                     <span class="mr-tag">{{ cat }}</span>
                 {% endfor %}
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -57,18 +88,22 @@
 
             <h3 class="mr-versions-title">📥 Скачать</h3>
             <div class="mr-versions-list">
-                {% for v in versions[:10] %}
+                {% for v in versions[:15] %}
                     {% for f in v.files %}
                         {% if f.primary %}
                         <a href="{{ f.url }}" class="mr-version-item" download target="_blank">
                             <div class="mr-v-info">
                                 <div class="mr-v-name">{{ v.name }}</div>
                                 <div class="mr-v-meta">
-                                    {% if v.game_versions %}
-                                    <span>MC {{ v.game_versions[0] }}</span>
+                                    {% set v_mc = parse_mc_versions(v.game_versions) %}
+                                    {% if v_mc %}
+                                        <span class="meta-mc">🎮 MC {{ v_mc[0] }}{% if v_mc|length > 1 %}+{% endif %}</span>
                                     {% endif %}
                                     {% if v.loaders %}
-                                    <span>{{ v.loaders[0]|title }}</span>
+                                        <span class="meta-loader">⚙️ {{ v.loaders[0]|title }}</span>
+                                    {% endif %}
+                                    {% if v.version_type %}
+                                        <span class="meta-type type-{{ v.version_type }}">{{ v.version_type|title }}</span>
                                     {% endif %}
                                     <span>⬇ {{ "{:,}".format(v.downloads).replace(",", " ") }}</span>
                                 </div>

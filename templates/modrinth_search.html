@@ -27,7 +27,7 @@
             {% endfor %}
         </select>
         <select name="mc_version">
-            <option value="">Все версии</option>
+            <option value="">Все версии MC</option>
             {% for v in versions %}
                 <option value="{{ v }}" {% if mc_version == v %}selected{% endif %}>{{ v }}</option>
             {% endfor %}
@@ -74,12 +74,26 @@
             </div>
             {% endif %}
 
+            <div class="version-info">
+                {% set mc_vers = parse_mc_versions(mod.versions) %}
+                {% if mc_vers %}
+                <span class="v-badge v-mc">
+                    <span class="v-label">MC:</span>
+                    <strong>{{ format_mc_versions(mod.versions, 2) }}</strong>
+                </span>
+                {% endif %}
+
+                {% set loaders = detect_mod_loader(mod.versions, mod.loaders if mod.loaders else []) %}
+                {% if loaders %}
+                <span class="v-badge v-loader">
+                    {% for l in loaders[:2] %}{{ l }}{% if not loop.last %}/{% endif %}{% endfor %}
+                </span>
+                {% endif %}
+            </div>
+
             <div class="mr-stats">
                 <span>⬇ {{ "{:,}".format(mod.downloads).replace(",", " ") }}</span>
                 <span>⭐ {{ "{:,}".format(mod.follows).replace(",", " ") }}</span>
-                {% if mod.versions %}
-                    <span class="mr-version">MC {{ mod.versions[-1] }}</span>
-                {% endif %}
             </div>
         </div>
     </a>
@@ -87,7 +101,6 @@
         <div class="empty-state">
             <div class="empty-icon">🔍</div>
             <h3>Ничего не найдено</h3>
-            <p>Попробуй изменить запрос</p>
         </div>
     {% endfor %}
 </div>
@@ -97,9 +110,7 @@
     {% if page > 1 %}
         <a href="{{ url_for('modrinth_search', q=query, category=category, mc_version=mc_version, sort=sort, page=page-1) }}" class="page-btn">← Назад</a>
     {% endif %}
-
     <span class="page-info">Страница {{ page }} из {{ total_pages }}</span>
-
     {% if page < total_pages %}
         <a href="{{ url_for('modrinth_search', q=query, category=category, mc_version=mc_version, sort=sort, page=page+1) }}" class="page-btn">Вперёд →</a>
     {% endif %}
