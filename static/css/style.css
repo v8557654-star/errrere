@@ -1442,3 +1442,200 @@ body {
 @media (max-width: 768px) {
     .screenshots-upload { grid-template-columns: repeat(2, 1fr); }
 }
+
+
+/* ===== AVATAR ===== */
+.user-avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent);
+}
+
+.profile-avatar-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--accent);
+}
+
+.profile-info { flex: 1; }
+
+.profile-actions {
+    margin-top: 12px;
+}
+
+/* ===== SUBSCRIBE ===== */
+.btn-subscribe {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: var(--gradient);
+    color: #0f1626;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.btn-subscribe:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(34, 255, 136, 0.3);
+}
+
+.btn-subscribe.subscribed {
+    background: var(--bg-card);
+    color: var(--text-main);
+    border: 2px solid var(--accent);
+}
+
+.sub-count {
+    background: rgba(255,255,255,0.2);
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+.btn-subscribe.subscribed .sub-count {
+    background: var(--accent);
+    color: #0f1626;
+}
+
+/* ===== AVATAR UPLOAD ===== */
+.avatar-upload {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.current-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent);
+}
+
+.current-avatar-letter {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--gradient);
+    color: #0f1626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    font-weight: 800;
+}
+
+.file-label-small {
+    background: var(--bg-main);
+    border: 2px dashed var(--accent);
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--accent);
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.file-label-small:hover {
+    background: rgba(34, 255, 136, 0.1);
+}
+
+.file-label-small input {
+    display: none;
+}
+
+/* ===== ACHIEVEMENTS ===== */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+}
+
+.achievement {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 18px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    opacity: 0.5;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.achievement.earned {
+    opacity: 1;
+    border-color: var(--accent);
+    background: linear-gradient(135deg, var(--bg-card), rgba(34, 255, 136, 0.05));
+}
+
+.achievement.earned::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gradient);
+}
+
+.ach-icon {
+    font-size: 40px;
+    filter: grayscale(100%);
+    transition: filter 0.3s;
+}
+
+.achievement.earned .ach-icon {
+    filter: none;
+    animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.ach-info { flex: 1; }
+
+.ach-name {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.ach-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.ach-badge {
+    background: var(--gradient);
+    color: #0f1626;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 16px;
+}
+
+.ach-lock {
+    font-size: 24px;
+    opacity: 0.5;
+}
+
+@media (max-width: 600px) {
+    .avatar-upload { flex-direction: column; align-items: flex-start; }
+}

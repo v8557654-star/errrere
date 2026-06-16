@@ -1,13 +1,31 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="profile-header">
-    <div class="profile-avatar-big">{{ user.username[0]|upper }}</div>
-    <div>
+    {% if user.avatar %}
+        <img src="{{ url_for('static', filename='avatars/' + user.avatar) }}" class="profile-avatar-img" alt="avatar">
+    {% else %}
+        <div class="profile-avatar-big">{{ user.username[0]|upper }}</div>
+    {% endif %}
+    <div class="profile-info">
         <h1>{{ user.username }}</h1>
         {% if user.bio %}
             <p class="profile-bio">{{ user.bio }}</p>
         {% endif %}
         <p class="profile-date">📅 С нами с {{ user.created_at.strftime('%d.%m.%Y') }}</p>
+
+        <div class="profile-actions">
+            {% if current_user.is_authenticated and current_user.id != user.id %}
+            <button class="btn-subscribe {% if current_user.is_subscribed_to(user) %}subscribed{% endif %}"
+                    onclick="toggleSubscribe({{ user.id }})" id="subBtn">
+                <span class="sub-text">
+                    {% if current_user.is_subscribed_to(user) %}✓ Подписан{% else %}+ Подписаться{% endif %}
+                </span>
+                <span class="sub-count">{{ user.followers_count }}</span>
+            </button>
+            {% elif not current_user.is_authenticated %}
+            <a href="{{ url_for('login') }}" class="btn-subscribe">+ Подписаться</a>
+            {% endif %}
+        </div>
     </div>
 </div>
 
@@ -17,16 +35,16 @@
         <div class="stat-label">📦 Модов</div>
     </div>
     <div class="stat-card">
-        <div class="stat-num">{{ total_downloads }}</div>
+        <div class="stat-num">{{ user.total_downloads }}</div>
         <div class="stat-label">⬇ Скачиваний</div>
     </div>
     <div class="stat-card">
-        <div class="stat-num">{{ total_likes }}</div>
+        <div class="stat-num">{{ user.total_likes }}</div>
         <div class="stat-label">❤ Лайков</div>
     </div>
     <div class="stat-card">
-        <div class="stat-num">{{ total_views }}</div>
-        <div class="stat-label">👁 Просмотров</div>
+        <div class="stat-num">{{ user.followers_count }}</div>
+        <div class="stat-label">👥 Подписчиков</div>
     </div>
 </div>
 
@@ -58,4 +76,25 @@
         </div>
     {% endfor %}
 </div>
+
+<script>
+async function toggleSubscribe(userId) {
+    try {
+        const response = await fetch(`/subscribe/${userId}`, {method: 'POST'});
+        const data = await response.json();
+        if (data.error) { alert(data.error); return; }
+        const btn = document.getElementById('subBtn');
+        const text = btn.querySelector('.sub-text');
+        const count = btn.querySelector('.sub-count');
+        if (data.subscribed) {
+            btn.classList.add('subscribed');
+            text.textContent = '✓ Подписан';
+        } else {
+            btn.classList.remove('subscribed');
+            text.textContent = '+ Подписаться';
+        }
+        count.textContent = data.count;
+    } catch(e) { alert('Ошибка'); }
+}
+</script>
 {% endblock %}

@@ -13,6 +13,7 @@ app.config['SECRET_KEY'] = 'super_secret_key_change_in_production_12345'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mods.db'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['SCREENSHOTS_FOLDER'] = 'static/screenshots'
+app.config['AVATARS_FOLDER'] = 'static/avatars'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
 db = SQLAlchemy(app)
@@ -21,6 +22,26 @@ login_manager.login_view = 'login'
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['SCREENSHOTS_FOLDER'], exist_ok=True)
+os.makedirs(app.config['AVATARS_FOLDER'], exist_ok=True)
+
+# ===== ДОСТИЖЕНИЯ =====
+ACHIEVEMENTS = {
+    'first_mod': {'name': 'Первый шаг', 'desc': 'Загрузил первый мод', 'icon': '🎯'},
+    'mods_5': {'name': 'Моддер', 'desc': '5 модов опубликовано', 'icon': '🛠️'},
+    'mods_10': {'name': 'Профи', 'desc': '10 модов опубликовано', 'icon': '⚡'},
+    'mods_25': {'name': 'Мастер', 'desc': '25 модов опубликовано', 'icon': '🏆'},
+    'downloads_10': {'name': 'Замечен', 'desc': '10 скачиваний', 'icon': '👀'},
+    'downloads_100': {'name': 'Популярный', 'desc': '100 скачиваний', 'icon': '🔥'},
+    'downloads_1000': {'name': 'Легенда', 'desc': '1000 скачиваний', 'icon': '👑'},
+    'likes_10': {'name': 'Любимец', 'desc': '10 лайков', 'icon': '❤️'},
+    'likes_50': {'name': 'Звезда', 'desc': '50 лайков', 'icon': '⭐'},
+    'likes_100': {'name': 'Кумир', 'desc': '100 лайков', 'icon': '💎'},
+    'first_comment': {'name': 'Социальный', 'desc': 'Первый комментарий', 'icon': '💬'},
+    'comments_10': {'name': 'Болтун', 'desc': '10 комментариев', 'icon': '🗣️'},
+    'first_like': {'name': 'Поддержка', 'desc': 'Поставил первый лайк', 'icon': '👍'},
+    'subscriber': {'name': 'Подписчик', 'desc': 'Подписался на автора', 'icon': '🔔'},
+    'popular_author': {'name': 'Известный', 'desc': '5 подписчиков', 'icon': '🌟'},
+}
 
 # ===== МОДЕЛИ =====
 class User(UserMixin, db.Model):
@@ -32,9 +53,65 @@ class User(UserMixin, db.Model):
     theme = db.Column(db.String(20), default='green')
     animations = db.Column(db.Boolean, default=True)
     bio = db.Column(db.String(300), default='')
+    avatar = db.Column(db.String(300), default='')
     mods = db.relationship('Mod', backref='author', lazy=True)
     likes = db.relationship('Like', backref='user', lazy=True)
     comments = db.relationship('Comment', backref='user', lazy=True, cascade='all, delete-orphan')
+
+    @property
+    def avatar_url(self):
+        if self.avatar:
+            return url_for('static', filename='avatars/' + self.avatar)
+        return None
+
+    @property
+    def total_downloads(self):
+        return sum(m.downloads for m in self.mods)
+
+    @property
+    def total_likes(self):
+        return sum(m.likes_count for m in self.mods)
+
+    @property
+    def followers_count(self):
+        return Subscription.query.filter_by(author_id=self.id).count()
+
+    @property
+    def following_count(self):
+        return Subscription.query.filter_by(follower_id=self.id).count()
+
+    def is_subscribed_to(self, author):
+        if not author or self.id == author.id:
+            return False
+        return Subscription.query.filter_by(follower_id=self.id, author_id=author.id).first() is not None
+
+    def get_achievements(self):
+        earned = []
+        mods_count = len(self.mods)
+        downloads = self.total_downloads
+        likes_received = self.total_likes
+        comments_count = len(self.comments)
+        likes_given = len(self.likes)
+        followers = self.followers_count
+        following = self.following_count
+
+        if mods_count >= 1: earned.append('first_mod')
+        if mods_count >= 5: earned.append('mods_5')
+        if mods_count >= 10: earned.append('mods_10')
+        if mods_count >= 25: earned.append('mods_25')
+        if downloads >= 10: earned.append('downloads_10')
+        if downloads >= 100: earned.append('downloads_100')
+        if downloads >= 1000: earned.append('downloads_1000')
+        if likes_received >= 10: earned.append('likes_10')
+        if likes_received >= 50: earned.append('likes_50')
+        if likes_received >= 100: earned.append('likes_100')
+        if comments_count >= 1: earned.append('first_comment')
+        if comments_count >= 10: earned.append('comments_10')
+        if likes_given >= 1: earned.append('first_like')
+        if following >= 1: earned.append('subscriber')
+        if followers >= 5: earned.append('popular_author')
+
+        return earned
 
 class Mod(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -54,17 +131,12 @@ class Mod(db.Model):
     comments = db.relationship('Comment', backref='mod', lazy=True, cascade='all, delete-orphan')
 
     @property
-    def likes_count(self):
-        return len(self.likes)
-
+    def likes_count(self): return len(self.likes)
     @property
-    def comments_count(self):
-        return len(self.comments)
-
+    def comments_count(self): return len(self.comments)
     @property
     def tags_list(self):
         return [t.strip() for t in self.tags.split(',') if t.strip()] if self.tags else []
-
     @property
     def screenshots_list(self):
         return [s.strip() for s in self.screenshots.split(',') if s.strip()] if self.screenshots else []
@@ -87,6 +159,12 @@ class Comment(db.Model):
     mod_id = db.Column(db.Integer, db.ForeignKey('mod.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class Subscription(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    follower_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -98,10 +176,10 @@ def allowed_image(filename):
     return filename.lower().rsplit('.', 1)[-1] in {'jpg', 'jpeg', 'png', 'gif', 'webp'}
 
 @app.context_processor
-def inject_theme():
+def inject_globals():
     if current_user.is_authenticated:
-        return dict(user_theme=current_user.theme, user_animations=current_user.animations)
-    return dict(user_theme='green', user_animations=True)
+        return dict(user_theme=current_user.theme, user_animations=current_user.animations, ACHIEVEMENTS=ACHIEVEMENTS)
+    return dict(user_theme='green', user_animations=True, ACHIEVEMENTS=ACHIEVEMENTS)
 
 # ===== РОУТЫ =====
 @app.route('/')
@@ -138,6 +216,20 @@ def index():
 
     return render_template('index.html', mods=mods, top_mods=top_mods, categories=categories, versions=versions,
                            search=search, sel_category=category, sel_version=mc_version, sort=sort)
+
+@app.route('/feed')
+@login_required
+def feed():
+    sub_ids = [s.author_id for s in Subscription.query.filter_by(follower_id=current_user.id).all()]
+    mods = Mod.query.filter(Mod.user_id.in_(sub_ids)).order_by(Mod.created_at.desc()).all() if sub_ids else []
+    return render_template('feed.html', mods=mods)
+
+@app.route('/favorites')
+@login_required
+def favorites():
+    liked_ids = [l.mod_id for l in Like.query.filter_by(user_id=current_user.id).all()]
+    mods = Mod.query.filter(Mod.id.in_(liked_ids)).order_by(Mod.created_at.desc()).all() if liked_ids else []
+    return render_template('favorites.html', mods=mods)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -190,7 +282,6 @@ def upload():
         unique_name = f"{current_user.id}_{int(datetime.utcnow().timestamp())}_{filename}"
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_name))
 
-        # Скриншоты
         screenshots = []
         for i in range(1, 6):
             screenshot = request.files.get(f'screenshot{i}')
@@ -234,7 +325,7 @@ def add_comment(mod_id):
         flash('Комментарий не может быть пустым', 'error')
         return redirect(url_for('mod_page', mod_id=mod_id))
     if len(text) > 1000:
-        flash('Слишком длинный комментарий (макс 1000)', 'error')
+        flash('Слишком длинный комментарий', 'error')
         return redirect(url_for('mod_page', mod_id=mod_id))
     comment = Comment(text=text, user_id=current_user.id, mod_id=mod_id)
     db.session.add(comment)
@@ -256,11 +347,24 @@ def delete_comment(comment_id):
 def user_page(username):
     user = User.query.filter_by(username=username).first_or_404()
     mods = Mod.query.filter_by(user_id=user.id).order_by(Mod.created_at.desc()).all()
-    total_likes = sum(m.likes_count for m in mods)
-    total_views = sum(m.views or 0 for m in mods)
-    total_downloads = sum(m.downloads for m in mods)
-    return render_template('user.html', user=user, mods=mods,
-                           total_likes=total_likes, total_views=total_views, total_downloads=total_downloads)
+    return render_template('user.html', user=user, mods=mods)
+
+@app.route('/subscribe/<int:user_id>', methods=['POST'])
+@login_required
+def subscribe(user_id):
+    if user_id == current_user.id:
+        return jsonify({'error': 'Нельзя подписаться на себя'})
+    author = User.query.get_or_404(user_id)
+    existing = Subscription.query.filter_by(follower_id=current_user.id, author_id=user_id).first()
+    if existing:
+        db.session.delete(existing)
+        subscribed = False
+    else:
+        sub = Subscription(follower_id=current_user.id, author_id=user_id)
+        db.session.add(sub)
+        subscribed = True
+    db.session.commit()
+    return jsonify({'subscribed': subscribed, 'count': author.followers_count})
 
 @app.route('/download/<int:mod_id>')
 def download(mod_id):
@@ -289,9 +393,13 @@ def like_mod(mod_id):
 @login_required
 def profile():
     mods = Mod.query.filter_by(user_id=current_user.id).order_by(Mod.created_at.desc()).all()
-    total_likes = sum(m.likes_count for m in mods)
-    total_views = sum(m.views or 0 for m in mods)
-    return render_template('profile.html', mods=mods, total_likes=total_likes, total_views=total_views)
+    return render_template('profile.html', mods=mods)
+
+@app.route('/achievements')
+@login_required
+def achievements():
+    earned = current_user.get_achievements()
+    return render_template('achievements.html', earned=earned, all_achievements=ACHIEVEMENTS)
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
@@ -316,6 +424,21 @@ def settings():
                     current_user.email = new_email
             db.session.commit()
             flash('Профиль обновлён!', 'success')
+        elif action == 'avatar':
+            avatar = request.files.get('avatar')
+            if avatar and avatar.filename and allowed_image(avatar.filename):
+                ext = avatar.filename.rsplit('.', 1)[-1].lower()
+                # Удаляем старую
+                if current_user.avatar:
+                    old = os.path.join(app.config['AVATARS_FOLDER'], current_user.avatar)
+                    if os.path.exists(old): os.remove(old)
+                av_name = f"{current_user.id}_{int(datetime.utcnow().timestamp())}.{ext}"
+                avatar.save(os.path.join(app.config['AVATARS_FOLDER'], av_name))
+                current_user.avatar = av_name
+                db.session.commit()
+                flash('Аватарка обновлена!', 'success')
+            else:
+                flash('Выбери картинку (jpg, png, gif)', 'error')
         elif action == 'password':
             old = request.form.get('old_password')
             new = request.form.get('new_password')
@@ -339,7 +462,6 @@ def delete_mod(mod_id):
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], mod.filename)
     if os.path.exists(filepath):
         os.remove(filepath)
-    # Удаляем скриншоты
     for ss in mod.screenshots_list:
         ss_path = os.path.join(app.config['SCREENSHOTS_FOLDER'], ss)
         if os.path.exists(ss_path):
@@ -357,6 +479,7 @@ with app.app_context():
                 "ALTER TABLE user ADD COLUMN theme VARCHAR(20) DEFAULT 'green'",
                 "ALTER TABLE user ADD COLUMN animations BOOLEAN DEFAULT 1",
                 "ALTER TABLE user ADD COLUMN bio VARCHAR(300) DEFAULT ''",
+                "ALTER TABLE user ADD COLUMN avatar VARCHAR(300) DEFAULT ''",
                 "ALTER TABLE mod ADD COLUMN views INTEGER DEFAULT 0",
                 "ALTER TABLE mod ADD COLUMN tags VARCHAR(300) DEFAULT ''",
                 "ALTER TABLE mod ADD COLUMN screenshots TEXT DEFAULT ''",
