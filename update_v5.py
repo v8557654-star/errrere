@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
+
+print("🚀 Этап 4 — Уведомления, ЛС, Активность...")
+
+# ============= APP.PY =============
+app_py = '''# -*- coding: utf-8 -*-
+import os
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from flask_sqlalchemy import SQLAlchemy
@@ -575,3 +581,695 @@ with app.app_context():
 
 if __name__ == '__main__':
     app.run(debug=True)
+'''
+
+# ============= BASE.HTML =============
+base_html = '''<!DOCTYPE html>
+<html lang="ru" data-theme="{{ user_theme }}" data-animations="{{ 'on' if user_animations else 'off' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MineMods — Моды для Minecraft</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="{{ url_for('index') }}" class="logo">
+                <span class="logo-icon">⛏</span>
+                <span class="logo-text">MineMods</span>
+            </a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('index') }}" class="nav-item">
+                <span class="nav-icon">🏠</span><span>Каталог</span>
+            </a>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('feed') }}" class="nav-item">
+                <span class="nav-icon">📡</span><span>Подписки</span>
+            </a>
+            <a href="{{ url_for('favorites') }}" class="nav-item">
+                <span class="nav-icon">❤️</span><span>Избранное</span>
+            </a>
+            <a href="{{ url_for('notifications') }}" class="nav-item">
+                <span class="nav-icon">🔔</span><span>Уведомления</span>
+                {% if unread_notif > 0 %}<span class="badge-count">{{ unread_notif }}</span>{% endif %}
+            </a>
+            <a href="{{ url_for('messages') }}" class="nav-item">
+                <span class="nav-icon">💌</span><span>Сообщения</span>
+                {% if unread_msg > 0 %}<span class="badge-count">{{ unread_msg }}</span>{% endif %}
+            </a>
+            <a href="{{ url_for('upload') }}" class="nav-item">
+                <span class="nav-icon">📤</span><span>Загрузить</span>
+            </a>
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                <span class="nav-icon">👤</span><span>Профиль</span>
+            </a>
+            <a href="{{ url_for('achievements') }}" class="nav-item">
+                <span class="nav-icon">🏅</span><span>Достижения</span>
+            </a>
+            <a href="{{ url_for('settings') }}" class="nav-item">
+                <span class="nav-icon">⚙️</span><span>Настройки</span>
+            </a>
+            {% endif %}
+        </nav>
+
+        <div class="sidebar-footer">
+            {% if current_user.is_authenticated %}
+                <div class="user-card">
+                    {% if current_user.avatar %}
+                        <img src="{{ url_for('static', filename='avatars/' + current_user.avatar) }}" class="user-avatar-img" alt="avatar">
+                    {% else %}
+                        <div class="user-avatar">{{ current_user.username[0]|upper }}</div>
+                    {% endif %}
+                    <div class="user-info">
+                        <div class="user-name">{{ current_user.username }}</div>
+                        <a href="{{ url_for('logout') }}" class="user-logout">Выйти</a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn-sidebar">Войти</a>
+                <a href="{{ url_for('register') }}" class="btn-sidebar btn-primary">Регистрация</a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <button class="mobile-menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+</div>
+
+<script>
+document.addEventListener('click', function(e) {
+    const sidebar = document.querySelector('.sidebar');
+    const toggle = document.querySelector('.mobile-menu-toggle');
+    if (window.innerWidth <= 900 && sidebar.classList.contains('open')
+        && !sidebar.contains(e.target) && e.target !== toggle) {
+        sidebar.classList.remove('open');
+    }
+});
+</script>
+</body>
+</html>'''
+
+# ============= NOTIFICATIONS.HTML =============
+notifications_html = '''{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🔔 Уведомления</h1>
+        <p class="page-subtitle">Все события на твоём аккаунте</p>
+    </div>
+</div>
+
+<div class="notifications-list">
+    {% for n in notifs %}
+    <a href="{{ n.link or '#' }}" class="notif {% if not n.is_read %}new{% endif %}">
+        <div class="notif-icon">
+            {% if n.type == 'like' %}❤️
+            {% elif n.type == 'comment' %}💬
+            {% elif n.type == 'subscribe' %}🔔
+            {% elif n.type == 'new_mod' %}🆕
+            {% elif n.type == 'message' %}💌
+            {% else %}📌
+            {% endif %}
+        </div>
+        <div class="notif-body">
+            <div class="notif-text">{{ n.text }}</div>
+            <div class="notif-date">{{ n.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+        </div>
+    </a>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🔕</div>
+        <h3>Пока нет уведомлений</h3>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}'''
+
+# ============= MESSAGES.HTML =============
+messages_html = '''{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">💌 Сообщения</h1>
+        <p class="page-subtitle">Личные сообщения</p>
+    </div>
+</div>
+
+<div class="chats-list">
+    {% for chat in chats %}
+    <a href="{{ url_for('chat', username=chat.user.username) }}" class="chat-item">
+        {% if chat.user.avatar %}
+            <img src="{{ url_for('static', filename='avatars/' + chat.user.avatar) }}" class="chat-avatar" alt="">
+        {% else %}
+            <div class="chat-avatar-letter">{{ chat.user.username[0]|upper }}</div>
+        {% endif %}
+        <div class="chat-info">
+            <div class="chat-name">{{ chat.user.username }}</div>
+            {% if chat.last %}
+            <div class="chat-last">
+                {% if chat.last.from_user_id == current_user.id %}<span>Вы: </span>{% endif %}
+                {{ chat.last.text[:60] }}{% if chat.last.text|length > 60 %}...{% endif %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="chat-meta">
+            {% if chat.last %}<div class="chat-date">{{ chat.last.created_at.strftime('%d.%m %H:%M') }}</div>{% endif %}
+            {% if chat.unread > 0 %}<div class="chat-unread">{{ chat.unread }}</div>{% endif %}
+        </div>
+    </a>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>Нет диалогов</h3>
+        <p>Зайди на страницу автора и напиши ему!</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}'''
+
+# ============= CHAT.HTML =============
+chat_html = '''{% extends 'base.html' %}
+{% block content %}
+<div class="chat-header">
+    <a href="{{ url_for('messages') }}" class="back-btn">← Назад</a>
+    <div class="chat-user">
+        {% if other.avatar %}
+            <img src="{{ url_for('static', filename='avatars/' + other.avatar) }}" class="chat-avatar" alt="">
+        {% else %}
+            <div class="chat-avatar-letter">{{ other.username[0]|upper }}</div>
+        {% endif %}
+        <a href="{{ url_for('user_page', username=other.username) }}" class="chat-username">{{ other.username }}</a>
+    </div>
+</div>
+
+<div class="chat-messages" id="chat-messages">
+    {% for m in msgs %}
+    <div class="msg {% if m.from_user_id == current_user.id %}msg-mine{% else %}msg-other{% endif %}">
+        <div class="msg-bubble">
+            <div class="msg-text">{{ m.text }}</div>
+            <div class="msg-time">{{ m.created_at.strftime('%H:%M') }}</div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">💬</div>
+        <h3>Начни диалог</h3>
+    </div>
+    {% endfor %}
+</div>
+
+<form method="POST" class="chat-form">
+    <input type="text" name="text" placeholder="Написать сообщение..." required maxlength="2000" autofocus>
+    <button type="submit">📤</button>
+</form>
+
+<script>
+const m = document.getElementById('chat-messages');
+if (m) m.scrollTop = m.scrollHeight;
+</script>
+{% endblock %}'''
+
+# ============= ACTIVITY.HTML =============
+activity_html = '''{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">📅 Активность {{ user.username }}</h1>
+    </div>
+</div>
+
+<div class="activity-list">
+    {% for a in acts %}
+    <a href="{{ a.link or '#' }}" class="activity-item">
+        <div class="act-icon">
+            {% if a.type == 'uploaded' %}📤
+            {% elif a.type == 'liked' %}❤️
+            {% elif a.type == 'commented' %}💬
+            {% elif a.type == 'subscribed' %}🔔
+            {% else %}📌
+            {% endif %}
+        </div>
+        <div class="act-body">
+            <div class="act-text">{{ a.text }}</div>
+            <div class="act-date">{{ a.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+        </div>
+    </a>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <h3>Нет активности</h3>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}'''
+
+# ============= USER.HTML (с кнопкой "Написать") =============
+user_html = '''{% extends 'base.html' %}
+{% block content %}
+<div class="profile-header">
+    {% if user.avatar %}
+        <img src="{{ url_for('static', filename='avatars/' + user.avatar) }}" class="profile-avatar-img" alt="avatar">
+    {% else %}
+        <div class="profile-avatar-big">{{ user.username[0]|upper }}</div>
+    {% endif %}
+    <div class="profile-info">
+        <h1>{{ user.username }}</h1>
+        {% if user.bio %}
+            <p class="profile-bio">{{ user.bio }}</p>
+        {% endif %}
+        <p class="profile-date">📅 С нами с {{ user.created_at.strftime('%d.%m.%Y') }}</p>
+
+        <div class="profile-actions">
+            {% if current_user.is_authenticated and current_user.id != user.id %}
+            <button class="btn-subscribe {% if current_user.is_subscribed_to(user) %}subscribed{% endif %}"
+                    onclick="toggleSubscribe({{ user.id }})" id="subBtn">
+                <span class="sub-text">
+                    {% if current_user.is_subscribed_to(user) %}✓ Подписан{% else %}+ Подписаться{% endif %}
+                </span>
+                <span class="sub-count">{{ user.followers_count }}</span>
+            </button>
+            <a href="{{ url_for('chat', username=user.username) }}" class="btn-subscribe" style="background: var(--bg-card); color: var(--text-main); border: 2px solid var(--border);">
+                💌 Написать
+            </a>
+            <a href="{{ url_for('activity', username=user.username) }}" class="btn-subscribe" style="background: var(--bg-card); color: var(--text-main); border: 2px solid var(--border);">
+                📅 Активность
+            </a>
+            {% elif current_user.is_authenticated and current_user.id == user.id %}
+            <a href="{{ url_for('activity', username=user.username) }}" class="btn-subscribe" style="background: var(--bg-card); color: var(--text-main); border: 2px solid var(--border);">
+                📅 Моя активность
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="profile-stats">
+    <div class="stat-card">
+        <div class="stat-num">{{ mods|length }}</div>
+        <div class="stat-label">📦 Модов</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ user.total_downloads }}</div>
+        <div class="stat-label">⬇ Скачиваний</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ user.total_likes }}</div>
+        <div class="stat-label">❤ Лайков</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ user.followers_count }}</div>
+        <div class="stat-label">👥 Подписчиков</div>
+    </div>
+</div>
+
+<h3 class="section-title">📦 Моды автора</h3>
+
+<div class="mods-grid">
+    {% for mod in mods %}
+    <div class="mod-card">
+        <div class="mod-card-header">
+            <div class="mod-category">{{ mod.category }}</div>
+            <div class="mod-mc-badge">MC {{ mod.mc_version }}</div>
+        </div>
+        <h3><a href="{{ url_for('mod_page', mod_id=mod.id) }}">{{ mod.title }}</a></h3>
+        <p class="mod-meta"><span>v{{ mod.version }}</span></p>
+        <p class="mod-desc">{{ mod.description[:120] }}{% if mod.description|length > 120 %}...{% endif %}</p>
+        <div class="mod-footer">
+            <div class="mod-stats">
+                <span>⬇ {{ mod.downloads }}</span>
+                <span>❤ {{ mod.likes_count }}</span>
+            </div>
+            <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download">Скачать</a>
+        </div>
+    </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h3>У автора пока нет модов</h3>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+async function toggleSubscribe(userId) {
+    try {
+        const response = await fetch(`/subscribe/${userId}`, {method: 'POST'});
+        const data = await response.json();
+        if (data.error) { alert(data.error); return; }
+        const btn = document.getElementById('subBtn');
+        const text = btn.querySelector('.sub-text');
+        const count = btn.querySelector('.sub-count');
+        if (data.subscribed) {
+            btn.classList.add('subscribed');
+            text.textContent = '✓ Подписан';
+        } else {
+            btn.classList.remove('subscribed');
+            text.textContent = '+ Подписаться';
+        }
+        count.textContent = data.count;
+    } catch(e) { alert('Ошибка'); }
+}
+</script>
+{% endblock %}'''
+
+# ============= ДОБАВЛЯЕМ CSS =============
+extra_css = '''
+
+/* ===== BADGE ===== */
+.badge-count {
+    background: #ff4757;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 800;
+    margin-left: auto;
+    min-width: 20px;
+    text-align: center;
+    animation: pulse 2s infinite;
+}
+
+/* ===== NOTIFICATIONS ===== */
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.notif {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: var(--bg-card);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+}
+
+.notif:hover {
+    transform: translateX(5px);
+    border-color: var(--accent);
+}
+
+.notif.new {
+    background: linear-gradient(90deg, rgba(34,255,136,0.1), var(--bg-card));
+    border-left: 3px solid var(--accent);
+}
+
+.notif-icon {
+    font-size: 28px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-main);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.notif-body { flex: 1; }
+.notif-text { font-weight: 600; margin-bottom: 4px; }
+.notif-date { font-size: 12px; color: var(--text-muted); }
+
+/* ===== CHATS LIST ===== */
+.chats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: var(--bg-card);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+}
+
+.chat-item:hover {
+    border-color: var(--accent);
+    transform: translateX(5px);
+}
+
+.chat-avatar {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent);
+}
+
+.chat-avatar-letter {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: var(--gradient);
+    color: #0f1626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 22px;
+}
+
+.chat-info { flex: 1; min-width: 0; }
+.chat-name { font-weight: 700; margin-bottom: 4px; }
+.chat-last { color: var(--text-muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.chat-meta {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.chat-date { font-size: 11px; color: var(--text-muted); }
+
+.chat-unread {
+    background: var(--gradient);
+    color: #0f1626;
+    border-radius: 10px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+/* ===== CHAT PAGE ===== */
+.chat-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.back-btn {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.back-btn:hover { color: var(--accent); }
+
+.chat-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-username {
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.chat-username:hover { color: var(--accent); }
+
+.chat-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 50vh;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 12px 0;
+}
+
+.msg {
+    display: flex;
+    max-width: 70%;
+}
+
+.msg-mine {
+    align-self: flex-end;
+}
+
+.msg-other {
+    align-self: flex-start;
+}
+
+.msg-bubble {
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: var(--bg-card);
+    word-wrap: break-word;
+}
+
+.msg-mine .msg-bubble {
+    background: var(--gradient);
+    color: #0f1626;
+    border-bottom-right-radius: 4px;
+}
+
+.msg-other .msg-bubble {
+    border-bottom-left-radius: 4px;
+}
+
+.msg-text { font-size: 14px; line-height: 1.4; }
+
+.msg-time {
+    font-size: 10px;
+    opacity: 0.7;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.chat-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.chat-form input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+.chat-form input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.chat-form button {
+    width: 50px;
+    height: 50px;
+    background: var(--gradient);
+    color: #0f1626;
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chat-form button:hover {
+    transform: scale(1.1);
+}
+
+/* ===== ACTIVITY ===== */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: var(--bg-card);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+}
+
+.activity-item:hover {
+    border-color: var(--accent);
+    transform: translateX(5px);
+}
+
+.act-icon {
+    font-size: 24px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-main);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.act-body { flex: 1; }
+.act-text { font-weight: 600; }
+.act-date { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+'''
+
+# ============= ЗАПИСЫВАЕМ =============
+files = {
+    "app.py": app_py,
+    "templates/base.html": base_html,
+    "templates/notifications.html": notifications_html,
+    "templates/messages.html": messages_html,
+    "templates/chat.html": chat_html,
+    "templates/activity.html": activity_html,
+    "templates/user.html": user_html,
+}
+
+for path, content in files.items():
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"  ✅ {path}")
+
+css_path = "static/css/style.css"
+with open(css_path, "r", encoding="utf-8") as f:
+    existing_css = f.read()
+
+if "/* ===== BADGE ===== */" not in existing_css:
+    with open(css_path, "a", encoding="utf-8") as f:
+        f.write(extra_css)
+    print(f"  ✅ {css_path}")
+
+print("\n🎉 ЭТАП 4 ГОТОВ!")
+print("\n✨ Добавлено:")
+print("   🔔 Уведомления (лайки, комменты, подписки, новые моды)")
+print("   💌 Личные сообщения между пользователями")
+print("   📅 Лента активности")
+print("   🔴 Счётчики непрочитанных в меню")
+print("\n📤 git add . && git commit -m 'v5: notifications + messages + activity' && git push --force origin main")
+print("На PA: cd ~/mysite && git fetch origin main && git reset --hard origin/main && Reload")
+print("\n👉 'готово' — финальный Этап 5 (Админ-панель + Статистика + Новости)")

@@ -28,6 +28,14 @@
             <a href="{{ url_for('favorites') }}" class="nav-item">
                 <span class="nav-icon">❤️</span><span>Избранное</span>
             </a>
+            <a href="{{ url_for('notifications') }}" class="nav-item">
+                <span class="nav-icon">🔔</span><span>Уведомления</span>
+                {% if unread_notif > 0 %}<span class="badge-count">{{ unread_notif }}</span>{% endif %}
+            </a>
+            <a href="{{ url_for('messages') }}" class="nav-item">
+                <span class="nav-icon">💌</span><span>Сообщения</span>
+                {% if unread_msg > 0 %}<span class="badge-count">{{ unread_msg }}</span>{% endif %}
+            </a>
             <a href="{{ url_for('upload') }}" class="nav-item">
                 <span class="nav-icon">📤</span><span>Загрузить</span>
             </a>

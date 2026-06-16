@@ -22,8 +22,16 @@
                 </span>
                 <span class="sub-count">{{ user.followers_count }}</span>
             </button>
-            {% elif not current_user.is_authenticated %}
-            <a href="{{ url_for('login') }}" class="btn-subscribe">+ Подписаться</a>
+            <a href="{{ url_for('chat', username=user.username) }}" class="btn-subscribe" style="background: var(--bg-card); color: var(--text-main); border: 2px solid var(--border);">
+                💌 Написать
+            </a>
+            <a href="{{ url_for('activity', username=user.username) }}" class="btn-subscribe" style="background: var(--bg-card); color: var(--text-main); border: 2px solid var(--border);">
+                📅 Активность
+            </a>
+            {% elif current_user.is_authenticated and current_user.id == user.id %}
+            <a href="{{ url_for('activity', username=user.username) }}" class="btn-subscribe" style="background: var(--bg-card); color: var(--text-main); border: 2px solid var(--border);">
+                📅 Моя активность
+            </a>
             {% endif %}
         </div>
     </div>
@@ -64,7 +72,6 @@
             <div class="mod-stats">
                 <span>⬇ {{ mod.downloads }}</span>
                 <span>❤ {{ mod.likes_count }}</span>
-                <span>👁 {{ mod.views or 0 }}</span>
             </div>
             <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download">Скачать</a>
         </div>
