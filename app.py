@@ -5,8 +5,11 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy import func, or_, and_, text
+from functools import wraps
+
+ADMIN_USERNAME = 'nehea664'
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_secret_key_change_in_production_12345'
@@ -26,23 +29,22 @@ os.makedirs(app.config['AVATARS_FOLDER'], exist_ok=True)
 
 ACHIEVEMENTS = {
     'first_mod': {'name': 'Первый шаг', 'desc': 'Загрузил первый мод', 'icon': '🎯'},
-    'mods_5': {'name': 'Моддер', 'desc': '5 модов опубликовано', 'icon': '🛠️'},
-    'mods_10': {'name': 'Профи', 'desc': '10 модов опубликовано', 'icon': '⚡'},
-    'mods_25': {'name': 'Мастер', 'desc': '25 модов опубликовано', 'icon': '🏆'},
+    'mods_5': {'name': 'Моддер', 'desc': '5 модов', 'icon': '🛠️'},
+    'mods_10': {'name': 'Профи', 'desc': '10 модов', 'icon': '⚡'},
+    'mods_25': {'name': 'Мастер', 'desc': '25 модов', 'icon': '🏆'},
     'downloads_10': {'name': 'Замечен', 'desc': '10 скачиваний', 'icon': '👀'},
     'downloads_100': {'name': 'Популярный', 'desc': '100 скачиваний', 'icon': '🔥'},
     'downloads_1000': {'name': 'Легенда', 'desc': '1000 скачиваний', 'icon': '👑'},
     'likes_10': {'name': 'Любимец', 'desc': '10 лайков', 'icon': '❤️'},
     'likes_50': {'name': 'Звезда', 'desc': '50 лайков', 'icon': '⭐'},
     'likes_100': {'name': 'Кумир', 'desc': '100 лайков', 'icon': '💎'},
-    'first_comment': {'name': 'Социальный', 'desc': 'Первый комментарий', 'icon': '💬'},
-    'comments_10': {'name': 'Болтун', 'desc': '10 комментариев', 'icon': '🗣️'},
-    'first_like': {'name': 'Поддержка', 'desc': 'Поставил первый лайк', 'icon': '👍'},
-    'subscriber': {'name': 'Подписчик', 'desc': 'Подписался на автора', 'icon': '🔔'},
+    'first_comment': {'name': 'Социальный', 'desc': 'Первый коммент', 'icon': '💬'},
+    'comments_10': {'name': 'Болтун', 'desc': '10 комментов', 'icon': '🗣️'},
+    'first_like': {'name': 'Поддержка', 'desc': 'Первый лайк', 'icon': '👍'},
+    'subscriber': {'name': 'Подписчик', 'desc': 'Подписался', 'icon': '🔔'},
     'popular_author': {'name': 'Известный', 'desc': '5 подписчиков', 'icon': '🌟'},
 }
 
-# ===== МОДЕЛИ =====
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -53,14 +55,13 @@ class User(UserMixin, db.Model):
     animations = db.Column(db.Boolean, default=True)
     bio = db.Column(db.String(300), default='')
     avatar = db.Column(db.String(300), default='')
+    is_banned = db.Column(db.Boolean, default=False)
     mods = db.relationship('Mod', backref='author', lazy=True)
     likes = db.relationship('Like', backref='user', lazy=True)
     comments = db.relationship('Comment', backref='user', lazy=True, cascade='all, delete-orphan')
 
     @property
-    def avatar_url(self):
-        if self.avatar: return url_for('static', filename='avatars/' + self.avatar)
-        return None
+    def is_admin(self): return self.username == ADMIN_USERNAME
     @property
     def total_downloads(self): return sum(m.downloads for m in self.mods)
     @property
@@ -70,11 +71,9 @@ class User(UserMixin, db.Model):
     @property
     def following_count(self): return Subscription.query.filter_by(follower_id=self.id).count()
     @property
-    def unread_notifications(self):
-        return Notification.query.filter_by(user_id=self.id, is_read=False).count()
+    def unread_notifications(self): return Notification.query.filter_by(user_id=self.id, is_read=False).count()
     @property
-    def unread_messages(self):
-        return Message.query.filter_by(to_user_id=self.id, is_read=False).count()
+    def unread_messages(self): return Message.query.filter_by(to_user_id=self.id, is_read=False).count()
 
     def is_subscribed_to(self, author):
         if not author or self.id == author.id: return False
@@ -82,28 +81,23 @@ class User(UserMixin, db.Model):
 
     def get_achievements(self):
         earned = []
-        mods_count = len(self.mods)
-        downloads = self.total_downloads
-        likes_received = self.total_likes
-        comments_count = len(self.comments)
-        likes_given = len(self.likes)
-        followers = self.followers_count
-        following = self.following_count
-        if mods_count >= 1: earned.append('first_mod')
-        if mods_count >= 5: earned.append('mods_5')
-        if mods_count >= 10: earned.append('mods_10')
-        if mods_count >= 25: earned.append('mods_25')
-        if downloads >= 10: earned.append('downloads_10')
-        if downloads >= 100: earned.append('downloads_100')
-        if downloads >= 1000: earned.append('downloads_1000')
-        if likes_received >= 10: earned.append('likes_10')
-        if likes_received >= 50: earned.append('likes_50')
-        if likes_received >= 100: earned.append('likes_100')
-        if comments_count >= 1: earned.append('first_comment')
-        if comments_count >= 10: earned.append('comments_10')
-        if likes_given >= 1: earned.append('first_like')
-        if following >= 1: earned.append('subscriber')
-        if followers >= 5: earned.append('popular_author')
+        mc = len(self.mods); dl = self.total_downloads; lr = self.total_likes
+        cc = len(self.comments); lg = len(self.likes); fl = self.followers_count; fn = self.following_count
+        if mc >= 1: earned.append('first_mod')
+        if mc >= 5: earned.append('mods_5')
+        if mc >= 10: earned.append('mods_10')
+        if mc >= 25: earned.append('mods_25')
+        if dl >= 10: earned.append('downloads_10')
+        if dl >= 100: earned.append('downloads_100')
+        if dl >= 1000: earned.append('downloads_1000')
+        if lr >= 10: earned.append('likes_10')
+        if lr >= 50: earned.append('likes_50')
+        if lr >= 100: earned.append('likes_100')
+        if cc >= 1: earned.append('first_comment')
+        if cc >= 10: earned.append('comments_10')
+        if lg >= 1: earned.append('first_like')
+        if fn >= 1: earned.append('subscriber')
+        if fl >= 5: earned.append('popular_author')
         return earned
 
 class Mod(db.Model):
@@ -160,12 +154,11 @@ class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     from_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    type = db.Column(db.String(50))  # like, comment, subscribe, new_mod
+    type = db.Column(db.String(50))
     text = db.Column(db.String(300))
     link = db.Column(db.String(300))
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
     @property
     def from_user(self):
         return User.query.get(self.from_user_id) if self.from_user_id else None
@@ -177,7 +170,6 @@ class Message(db.Model):
     text = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
     @property
     def from_user(self): return User.query.get(self.from_user_id)
     @property
@@ -186,14 +178,28 @@ class Message(db.Model):
 class Activity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    type = db.Column(db.String(50))  # uploaded, liked, commented, subscribed
+    type = db.Column(db.String(50))
     text = db.Column(db.String(300))
     link = db.Column(db.String(300))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class News(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated
 
 def allowed_file(filename):
     return filename.lower().endswith('.jar')
@@ -202,14 +208,11 @@ def allowed_image(filename):
     return filename.lower().rsplit('.', 1)[-1] in {'jpg', 'jpeg', 'png', 'gif', 'webp'}
 
 def notify(user_id, type, text, link='', from_user_id=None):
-    """Создать уведомление"""
-    if from_user_id == user_id:
-        return  # Не уведомляем самих себя
+    if from_user_id == user_id: return
     n = Notification(user_id=user_id, from_user_id=from_user_id, type=type, text=text, link=link)
     db.session.add(n)
 
 def log_activity(user_id, type, text, link=''):
-    """Записать активность"""
     a = Activity(user_id=user_id, type=type, text=text, link=link)
     db.session.add(a)
 
@@ -217,13 +220,21 @@ def log_activity(user_id, type, text, link=''):
 def inject_globals():
     if current_user.is_authenticated:
         return dict(
-            user_theme=current_user.theme,
-            user_animations=current_user.animations,
+            user_theme=current_user.theme, user_animations=current_user.animations,
             ACHIEVEMENTS=ACHIEVEMENTS,
             unread_notif=current_user.unread_notifications,
-            unread_msg=current_user.unread_messages
+            unread_msg=current_user.unread_messages,
+            is_admin=current_user.is_admin,
         )
-    return dict(user_theme='green', user_animations=True, ACHIEVEMENTS=ACHIEVEMENTS, unread_notif=0, unread_msg=0)
+    return dict(user_theme='green', user_animations=True, ACHIEVEMENTS=ACHIEVEMENTS,
+                unread_notif=0, unread_msg=0, is_admin=False)
+
+@app.before_request
+def check_banned():
+    if current_user.is_authenticated and current_user.is_banned and not current_user.is_admin:
+        logout_user()
+        flash('Ваш аккаунт заблокирован', 'error')
+        return redirect(url_for('login'))
 
 # ===== РОУТЫ =====
 @app.route('/')
@@ -243,10 +254,17 @@ def index():
     else: query = query.order_by(Mod.created_at.desc())
     mods = query.all()
     top_mods = Mod.query.order_by(Mod.downloads.desc()).limit(3).all() if not search and not category and not mc_version else []
+    latest_news = News.query.order_by(News.created_at.desc()).limit(3).all()
     categories = ['Магия', 'Техника', 'Оружие', 'Мобы', 'Декор', 'Еда', 'Миры', 'Утилиты', 'Другое']
     versions = ['1.21', '1.20.4', '1.20.2', '1.20.1', '1.19.4', '1.19.2', '1.18.2', '1.16.5', '1.12.2']
-    return render_template('index.html', mods=mods, top_mods=top_mods, categories=categories, versions=versions,
-                           search=search, sel_category=category, sel_version=mc_version, sort=sort)
+    return render_template('index.html', mods=mods, top_mods=top_mods, latest_news=latest_news,
+                           categories=categories, versions=versions, search=search,
+                           sel_category=category, sel_version=mc_version, sort=sort)
+
+@app.route('/news')
+def news_list():
+    news = News.query.order_by(News.created_at.desc()).all()
+    return render_template('news.html', news=news)
 
 @app.route('/feed')
 @login_required
@@ -266,7 +284,6 @@ def favorites():
 @login_required
 def notifications():
     notifs = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(50).all()
-    # Помечаем как прочитанные
     Notification.query.filter_by(user_id=current_user.id, is_read=False).update({'is_read': True})
     db.session.commit()
     return render_template('notifications.html', notifs=notifs)
@@ -274,7 +291,6 @@ def notifications():
 @app.route('/messages')
 @login_required
 def messages():
-    # Список всех диалогов
     sent = db.session.query(Message.to_user_id).filter_by(from_user_id=current_user.id).distinct()
     received = db.session.query(Message.from_user_id).filter_by(to_user_id=current_user.id).distinct()
     user_ids = set([r[0] for r in sent.all()] + [r[0] for r in received.all()])
@@ -307,7 +323,6 @@ def chat(username):
                    url_for('chat', username=current_user.username), current_user.id)
             db.session.commit()
         return redirect(url_for('chat', username=username))
-    # Помечаем сообщения от другого как прочитанные
     Message.query.filter_by(from_user_id=other.id, to_user_id=current_user.id, is_read=False).update({'is_read': True})
     db.session.commit()
     msgs = Message.query.filter(or_(
@@ -344,6 +359,9 @@ def login():
     if request.method == 'POST':
         user = User.query.filter_by(username=request.form['username']).first()
         if user and check_password_hash(user.password, request.form['password']):
+            if user.is_banned and user.username != ADMIN_USERNAME:
+                flash('Ваш аккаунт заблокирован', 'error')
+                return redirect(url_for('login'))
             login_user(user)
             flash('С возвращением!', 'success')
             return redirect(url_for('index'))
@@ -383,11 +401,8 @@ def upload():
             category=request.form['category'], tags=request.form.get('tags', ''),
             screenshots=','.join(screenshots), filename=unique_name, user_id=current_user.id
         )
-        db.session.add(mod)
-        db.session.flush()
-        # Активность
+        db.session.add(mod); db.session.flush()
         log_activity(current_user.id, 'uploaded', f'Опубликовал мод "{mod.title}"', url_for('mod_page', mod_id=mod.id))
-        # Уведомление подписчикам
         subs = Subscription.query.filter_by(author_id=current_user.id).all()
         for s in subs:
             notify(s.follower_id, 'new_mod', f'{current_user.username} опубликовал новый мод: {mod.title}',
@@ -426,7 +441,7 @@ def add_comment(mod_id):
 def delete_comment(comment_id):
     comment = Comment.query.get_or_404(comment_id)
     mod_id = comment.mod_id
-    if comment.user_id != current_user.id and comment.mod.user_id != current_user.id:
+    if comment.user_id != current_user.id and comment.mod.user_id != current_user.id and not current_user.is_admin:
         abort(403)
     db.session.delete(comment); db.session.commit()
     return redirect(url_for('mod_page', mod_id=mod_id) + '#comments')
@@ -523,13 +538,10 @@ def settings():
                 av_name = f"{current_user.id}_{int(datetime.utcnow().timestamp())}.{ext}"
                 avatar.save(os.path.join(app.config['AVATARS_FOLDER'], av_name))
                 current_user.avatar = av_name
-                db.session.commit()
-                flash('Аватарка обновлена!', 'success')
-            else:
-                flash('Выбери картинку', 'error')
+                db.session.commit(); flash('Аватарка обновлена!', 'success')
+            else: flash('Выбери картинку', 'error')
         elif action == 'password':
-            old = request.form.get('old_password')
-            new = request.form.get('new_password')
+            old = request.form.get('old_password'); new = request.form.get('new_password')
             if not check_password_hash(current_user.password, old):
                 flash('Неверный пароль', 'error')
             elif len(new) < 6:
@@ -544,7 +556,8 @@ def settings():
 @login_required
 def delete_mod(mod_id):
     mod = Mod.query.get_or_404(mod_id)
-    if mod.user_id != current_user.id: return redirect(url_for('index'))
+    if mod.user_id != current_user.id and not current_user.is_admin:
+        return redirect(url_for('index'))
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], mod.filename)
     if os.path.exists(filepath): os.remove(filepath)
     for ss in mod.screenshots_list:
@@ -553,6 +566,119 @@ def delete_mod(mod_id):
     db.session.delete(mod); db.session.commit()
     flash('Мод удалён', 'success')
     return redirect(url_for('profile'))
+
+# ===== АДМИН =====
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    total_users = User.query.count()
+    total_mods = Mod.query.count()
+    total_downloads = db.session.query(func.sum(Mod.downloads)).scalar() or 0
+    total_likes = Like.query.count()
+    total_comments = Comment.query.count()
+    total_views = db.session.query(func.sum(Mod.views)).scalar() or 0
+
+    # За последние 7 дней
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    new_users_week = User.query.filter(User.created_at >= week_ago).count()
+    new_mods_week = Mod.query.filter(Mod.created_at >= week_ago).count()
+
+    # График активности (последние 7 дней)
+    chart_data = []
+    for i in range(6, -1, -1):
+        day = datetime.utcnow() - timedelta(days=i)
+        day_start = datetime(day.year, day.month, day.day)
+        day_end = day_start + timedelta(days=1)
+        cnt = Mod.query.filter(Mod.created_at >= day_start, Mod.created_at < day_end).count()
+        chart_data.append({'day': day.strftime('%d.%m'), 'count': cnt})
+
+    # Топ юзеров
+    top_authors = User.query.outerjoin(Mod).group_by(User.id).order_by(func.count(Mod.id).desc()).limit(5).all()
+
+    return render_template('admin/dashboard.html',
+        total_users=total_users, total_mods=total_mods, total_downloads=total_downloads,
+        total_likes=total_likes, total_comments=total_comments, total_views=total_views,
+        new_users_week=new_users_week, new_mods_week=new_mods_week,
+        chart_data=chart_data, top_authors=top_authors)
+
+@app.route('/admin/users')
+@admin_required
+def admin_users():
+    users = User.query.order_by(User.created_at.desc()).all()
+    return render_template('admin/users.html', users=users)
+
+@app.route('/admin/mods')
+@admin_required
+def admin_mods():
+    mods = Mod.query.order_by(Mod.created_at.desc()).all()
+    return render_template('admin/mods.html', mods=mods)
+
+@app.route('/admin/user/<int:user_id>/ban', methods=['POST'])
+@admin_required
+def admin_ban_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.username == ADMIN_USERNAME:
+        flash('Нельзя забанить админа', 'error')
+        return redirect(url_for('admin_users'))
+    user.is_banned = not user.is_banned
+    db.session.commit()
+    flash(f'{"Забанен" if user.is_banned else "Разбанен"}: {user.username}', 'success')
+    return redirect(url_for('admin_users'))
+
+@app.route('/admin/user/<int:user_id>/delete', methods=['POST'])
+@admin_required
+def admin_delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.username == ADMIN_USERNAME:
+        flash('Нельзя удалить админа', 'error')
+        return redirect(url_for('admin_users'))
+    # Удаляем все его моды и файлы
+    for mod in user.mods:
+        fp = os.path.join(app.config['UPLOAD_FOLDER'], mod.filename)
+        if os.path.exists(fp): os.remove(fp)
+        for ss in mod.screenshots_list:
+            sp = os.path.join(app.config['SCREENSHOTS_FOLDER'], ss)
+            if os.path.exists(sp): os.remove(sp)
+        db.session.delete(mod)
+    db.session.delete(user)
+    db.session.commit()
+    flash('Пользователь удалён', 'success')
+    return redirect(url_for('admin_users'))
+
+@app.route('/admin/mod/<int:mod_id>/delete', methods=['POST'])
+@admin_required
+def admin_delete_mod(mod_id):
+    mod = Mod.query.get_or_404(mod_id)
+    fp = os.path.join(app.config['UPLOAD_FOLDER'], mod.filename)
+    if os.path.exists(fp): os.remove(fp)
+    for ss in mod.screenshots_list:
+        sp = os.path.join(app.config['SCREENSHOTS_FOLDER'], ss)
+        if os.path.exists(sp): os.remove(sp)
+    db.session.delete(mod); db.session.commit()
+    flash('Мод удалён', 'success')
+    return redirect(url_for('admin_mods'))
+
+@app.route('/admin/news', methods=['GET', 'POST'])
+@admin_required
+def admin_news():
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        content = request.form.get('content', '').strip()
+        if title and content:
+            n = News(title=title, content=content)
+            db.session.add(n); db.session.commit()
+            flash('Новость опубликована!', 'success')
+        return redirect(url_for('admin_news'))
+    news = News.query.order_by(News.created_at.desc()).all()
+    return render_template('admin/news.html', news=news)
+
+@app.route('/admin/news/<int:news_id>/delete', methods=['POST'])
+@admin_required
+def admin_delete_news(news_id):
+    n = News.query.get_or_404(news_id)
+    db.session.delete(n); db.session.commit()
+    flash('Новость удалена', 'success')
+    return redirect(url_for('admin_news'))
 
 with app.app_context():
     db.create_all()
@@ -563,6 +689,7 @@ with app.app_context():
                 "ALTER TABLE user ADD COLUMN animations BOOLEAN DEFAULT 1",
                 "ALTER TABLE user ADD COLUMN bio VARCHAR(300) DEFAULT ''",
                 "ALTER TABLE user ADD COLUMN avatar VARCHAR(300) DEFAULT ''",
+                "ALTER TABLE user ADD COLUMN is_banned BOOLEAN DEFAULT 0",
                 "ALTER TABLE mod ADD COLUMN views INTEGER DEFAULT 0",
                 "ALTER TABLE mod ADD COLUMN tags VARCHAR(300) DEFAULT ''",
                 "ALTER TABLE mod ADD COLUMN screenshots TEXT DEFAULT ''",

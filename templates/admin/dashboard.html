@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">👑 Админ-панель</h1>
+        <p class="page-subtitle">Статистика сайта</p>
+    </div>
+</div>
+
+<div class="admin-stats">
+    <div class="admin-stat-card">
+        <div class="as-icon">👥</div>
+        <div class="as-num">{{ total_users }}</div>
+        <div class="as-label">Пользователей</div>
+        <div class="as-extra">+{{ new_users_week }} за неделю</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="as-icon">📦</div>
+        <div class="as-num">{{ total_mods }}</div>
+        <div class="as-label">Модов</div>
+        <div class="as-extra">+{{ new_mods_week }} за неделю</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="as-icon">⬇️</div>
+        <div class="as-num">{{ total_downloads }}</div>
+        <div class="as-label">Скачиваний</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="as-icon">❤️</div>
+        <div class="as-num">{{ total_likes }}</div>
+        <div class="as-label">Лайков</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="as-icon">💬</div>
+        <div class="as-num">{{ total_comments }}</div>
+        <div class="as-label">Комментариев</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="as-icon">👁️</div>
+        <div class="as-num">{{ total_views }}</div>
+        <div class="as-label">Просмотров</div>
+    </div>
+</div>
+
+<div class="admin-grid">
+    <div class="admin-block">
+        <h3>📈 Новые моды за неделю</h3>
+        <div class="chart">
+            {% set max_count = chart_data | map(attribute='count') | max %}
+            {% for d in chart_data %}
+            <div class="chart-bar">
+                <div class="bar-value">{{ d.count }}</div>
+                <div class="bar" style="height: {{ (d.count / max_count * 100) if max_count > 0 else 0 }}%"></div>
+                <div class="bar-label">{{ d.day }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="admin-block">
+        <h3>🏆 Топ авторов</h3>
+        <div class="top-authors">
+            {% for author in top_authors %}
+            <a href="{{ url_for('user_page', username=author.username) }}" class="top-author">
+                <span class="ta-rank">#{{ loop.index }}</span>
+                {% if author.avatar %}
+                    <img src="{{ url_for('static', filename='avatars/' + author.avatar) }}" class="ta-avatar">
+                {% else %}
+                    <div class="ta-avatar-letter">{{ author.username[0]|upper }}</div>
+                {% endif %}
+                <div class="ta-info">
+                    <div class="ta-name">{{ author.username }}</div>
+                    <div class="ta-mods">{{ author.mods|length }} модов</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="admin-actions">
+    <a href="{{ url_for('admin_users') }}" class="admin-action-btn">
+        <span>👥</span> Управление пользователями
+    </a>
+    <a href="{{ url_for('admin_mods') }}" class="admin-action-btn">
+        <span>📦</span> Все моды
+    </a>
+    <a href="{{ url_for('admin_news') }}" class="admin-action-btn">
+        <span>📰</span> Управление новостями
+    </a>
+</div>
+{% endblock %}
