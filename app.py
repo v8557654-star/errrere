@@ -896,16 +896,49 @@ GITHUB_HEADERS = {
 }
 
 @app.route('/github')
-def github_search():
-    query = request.args.get('q', 'minecraft mod')
-    sort = request.args.get('sort', 'stars')  # stars, forks, updated
+@app.route('/github/<content_type>')
+def github_search(content_type='mod'):
+    query = request.args.get('q', '')
+    sort = request.args.get('sort', 'stars')
     page = int(request.args.get('page', 1))
 
-    # Добавляем minecraft если не указано
-    search_q = query if 'minecraft' in query.lower() else f"{query} minecraft mod"
+    # Ключевые слова для разных типов
+    type_keywords = {
+        'mod': 'minecraft mod',
+        'shader': 'minecraft shader',
+        'plugin': 'minecraft plugin spigot',
+        'resourcepack': 'minecraft resourcepack',
+        'modpack': 'minecraft modpack',
+        'datapack': 'minecraft datapack',
+        'map': 'minecraft map',
+    }
+    type_lang = {
+        'mod': 'language:Java',
+        'plugin': 'language:Java',
+        'shader': 'language:GLSL OR language:Shaderlab',
+        'resourcepack': '',
+        'modpack': '',
+        'datapack': 'language:mcfunction',
+        'map': '',
+    }
+
+    valid_types = list(type_keywords.keys())
+    if content_type not in valid_types:
+        content_type = 'mod'
+
+    base_kw = type_keywords[content_type]
+    lang = type_lang[content_type]
+
+    if query:
+        search_q = f"{query} {base_kw}"
+    else:
+        search_q = base_kw
+
+    if lang:
+        search_q += f" {lang}"
 
     params = {
-        'q': search_q + ' language:Java',
+        'q': search_q,
         'sort': sort,
         'order': 'desc',
         'per_page': 20,
@@ -925,9 +958,19 @@ def github_search():
 
     total_pages = min((total + 19) // 20, 50)
 
+    content_types = [
+        ('mod', 'Моды', '⛏'),
+        ('shader', 'Шейдеры', '🌅'),
+        ('plugin', 'Плагины', '🔌'),
+        ('resourcepack', 'Ресурспаки', '🎨'),
+        ('modpack', 'Сборки', '📦'),
+        ('datapack', 'Датапаки', '📝'),
+        ('map', 'Карты', '🗺️'),
+    ]
     return render_template('github_search.html',
         results=results, query=query, sort=sort,
-        page=page, total=total, total_pages=total_pages)
+        page=page, total=total, total_pages=total_pages,
+        content_type=content_type, content_types=content_types)
 
 @app.route('/github/repo/<owner>/<repo>')
 def github_repo(owner, repo):

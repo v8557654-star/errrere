@@ -1,35 +1,44 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<div class="content-type-tabs mr-type-tabs">
+    {% for tk, tn, ti in content_types %}
+    <a href="{{ url_for('github_search', content_type=tk) }}" class="ct-tab {% if content_type == tk %}active{% endif %}">
+        <span class="ct-icon">{{ ti }}</span>
+        <span>{{ tn }}</span>
+    </a>
+    {% endfor %}
+</div>
+
 <div class="github-header">
     <div class="gh-logo">
         <div class="gh-logo-icon">🦊</div>
         <div>
             <h1>GitHub</h1>
-            <p>Open-source моды и проекты</p>
+            <p>Open-source проекты Minecraft</p>
         </div>
     </div>
     <div class="gh-stats">
-        <strong>{{ total }}</strong> репозиториев найдено
+        <strong>{{ total }}</strong> репозиториев
     </div>
 </div>
 
 <div class="search-bar">
-    <form method="GET" action="{{ url_for('github_search') }}">
+    <form method="GET" action="{{ url_for('github_search', content_type=content_type) }}">
         <div class="search-input-wrap">
             <span class="search-icon">🔍</span>
-            <input type="text" name="q" placeholder="Поиск (например: sodium, optifine, create)..." value="{{ query }}" autofocus>
+            <input type="text" name="q" placeholder="Поиск (например: sodium, complementary, essentials)..." value="{{ query }}" autofocus>
         </div>
         <button type="submit">Найти</button>
     </form>
 </div>
 
 <div class="sort-tabs">
-    <a href="{{ url_for('github_search', q=query, sort='stars') }}"
+    <a href="{{ url_for('github_search', content_type=content_type, q=query, sort='stars') }}"
        class="sort-tab {% if sort == 'stars' %}active{% endif %}">⭐ Звёзды</a>
-    <a href="{{ url_for('github_search', q=query, sort='forks') }}"
+    <a href="{{ url_for('github_search', content_type=content_type, q=query, sort='forks') }}"
        class="sort-tab {% if sort == 'forks' %}active{% endif %}">🍴 Форки</a>
-    <a href="{{ url_for('github_search', q=query, sort='updated') }}"
+    <a href="{{ url_for('github_search', content_type=content_type, q=query, sort='updated') }}"
        class="sort-tab {% if sort == 'updated' %}active{% endif %}">🔄 Обновлённые</a>
 </div>
 
@@ -74,11 +83,11 @@
 {% if total_pages > 1 %}
 <div class="pagination">
     {% if page > 1 %}
-        <a href="{{ url_for('github_search', q=query, sort=sort, page=page-1) }}" class="page-btn">← Назад</a>
+        <a href="{{ url_for('github_search', content_type=content_type, q=query, sort=sort, page=page-1) }}" class="page-btn">← Назад</a>
     {% endif %}
     <span class="page-info">Страница {{ page }} из {{ total_pages }}</span>
     {% if page < total_pages %}
-        <a href="{{ url_for('github_search', q=query, sort=sort, page=page+1) }}" class="page-btn">Вперёд →</a>
+        <a href="{{ url_for('github_search', content_type=content_type, q=query, sort=sort, page=page+1) }}" class="page-btn">Вперёд →</a>
     {% endif %}
 </div>
 {% endif %}

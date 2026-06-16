@@ -51,15 +51,6 @@
     </div>
 </div>
 
-<div class="content-type-tabs">
-    {% for tk, tn, ti in content_types_list %}
-    <a href="{{ url_for('index', type=tk) }}" class="ct-tab {% if content_type == tk %}active{% endif %}">
-        <span class="ct-icon">{{ ti }}</span>
-        <span>{{ tn }}</span>
-    </a>
-    {% endfor %}
-</div>
-
 <div class="search-bar">
     <form method="GET" action="{{ url_for('index') }}">
         <div class="search-input-wrap">
