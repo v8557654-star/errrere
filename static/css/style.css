@@ -2456,3 +2456,169 @@ body {
     .user-menu-name { display: none; }
     .topbar { padding: 0 12px; }
 }
+
+
+/* ===== AMOLED THEME ===== */
+[data-theme="amoled"] {
+    --bg-main: #000000;
+    --bg-card: #0a0a0a;
+    --bg-sidebar: #050505;
+    --text-main: #ffffff;
+    --text-muted: #6b6b6b;
+    --border: #1a1a1a;
+    --accent: #00ff88;
+    --accent-2: #00d4ff;
+    --gradient: linear-gradient(135deg, #00ff88, #00d4ff);
+}
+
+[data-theme="amoled"] body {
+    background: #000000 !important;
+    animation: none !important;
+}
+
+[data-theme="amoled"] .sidebar,
+[data-theme="amoled"] .topbar,
+[data-theme="amoled"] .mod-card,
+[data-theme="amoled"] .settings-card,
+[data-theme="amoled"] .admin-stat-card,
+[data-theme="amoled"] .form-page,
+[data-theme="amoled"] .news-item,
+[data-theme="amoled"] .comment,
+[data-theme="amoled"] .achievement,
+[data-theme="amoled"] .my-mod-card,
+[data-theme="amoled"] .stat-card,
+[data-theme="amoled"] .top-card,
+[data-theme="amoled"] .notif,
+[data-theme="amoled"] .chat-item,
+[data-theme="amoled"] .activity-item,
+[data-theme="amoled"] .admin-table-wrap,
+[data-theme="amoled"] .admin-block,
+[data-theme="amoled"] .empty-state,
+[data-theme="amoled"] .toast,
+[data-theme="amoled"] .user-dropdown,
+[data-theme="amoled"] .news-banner,
+[data-theme="amoled"] .news-pill {
+    background: #0a0a0a !important;
+    border-color: #1a1a1a !important;
+}
+
+[data-theme="amoled"] .mod-card:hover,
+[data-theme="amoled"] .top-card:hover,
+[data-theme="amoled"] .notif:hover,
+[data-theme="amoled"] .chat-item:hover,
+[data-theme="amoled"] .activity-item:hover,
+[data-theme="amoled"] .admin-stat-card:hover,
+[data-theme="amoled"] .admin-action-btn:hover {
+    border-color: #00ff88 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+}
+
+[data-theme="amoled"] .search-bar input,
+[data-theme="amoled"] .search-bar select,
+[data-theme="amoled"] .form-page input,
+[data-theme="amoled"] .form-page select,
+[data-theme="amoled"] .form-page textarea,
+[data-theme="amoled"] .settings-card input,
+[data-theme="amoled"] .settings-card textarea,
+[data-theme="amoled"] .comment-form textarea,
+[data-theme="amoled"] .chat-form input,
+[data-theme="amoled"] .file-label {
+    background: #000000 !important;
+    border-color: #1a1a1a !important;
+    color: #ffffff !important;
+}
+
+[data-theme="amoled"] .sort-tab,
+[data-theme="amoled"] .topbar-icon,
+[data-theme="amoled"] .topbar-btn,
+[data-theme="amoled"] .btn-sidebar,
+[data-theme="amoled"] .admin-btn,
+[data-theme="amoled"] .admin-action-btn,
+[data-theme="amoled"] .stat-mini {
+    background: #0a0a0a !important;
+    border-color: #1a1a1a !important;
+}
+
+[data-theme="amoled"] .user-menu-btn {
+    background: #0a0a0a !important;
+    border-color: #1a1a1a !important;
+}
+
+[data-theme="amoled"] .nav-item:hover {
+    background: #1a1a1a !important;
+}
+
+[data-theme="amoled"] .info-table,
+[data-theme="amoled"] .mod-info table {
+    background: #0a0a0a !important;
+}
+
+[data-theme="amoled"] .mod-info td,
+[data-theme="amoled"] .info-table td {
+    border-color: #1a1a1a !important;
+}
+
+[data-theme="amoled"] .admin-table th {
+    background: #000000 !important;
+}
+
+[data-theme="amoled"] .admin-table td {
+    border-color: #1a1a1a !important;
+}
+
+[data-theme="amoled"] ::-webkit-scrollbar-track {
+    background: #000000;
+}
+
+[data-theme="amoled"] .msg-other .msg-bubble {
+    background: #1a1a1a !important;
+}
+
+[data-theme="amoled"] .ach-icon,
+[data-theme="amoled"] .notif-icon,
+[data-theme="amoled"] .act-icon {
+    background: #000000 !important;
+}
+
+/* AMOLED preview в настройках */
+.theme-amoled .tp-bar { background: linear-gradient(135deg, #00ff88, #00d4ff); }
+.theme-amoled .tp-content { background: #000000; }
+.theme-amoled .theme-preview { background: #000000; }
+
+/* ===== TOAST В ПРАВЫЙ НИЖНИЙ УГОЛ ===== */
+.toast-container {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column-reverse !important;
+    gap: 10px;
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.toast {
+    transform: translateX(450px) !important;
+    opacity: 0;
+}
+
+.toast.show {
+    transform: translateX(0) !important;
+    opacity: 1;
+}
+
+.toast.hide {
+    transform: translateX(450px) !important;
+    opacity: 0;
+}
+
+@media (max-width: 600px) {
+    .toast-container {
+        right: 12px !important;
+        left: 12px !important;
+        bottom: 12px !important;
+        max-width: none;
+    }
+}

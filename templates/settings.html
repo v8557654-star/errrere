@@ -34,7 +34,7 @@
         <form method="POST">
             <input type="hidden" name="action" value="theme">
             <div class="theme-grid">
-                {% for tk, tn in [('green','Зелёный'),('blue','Синий'),('purple','Фиолетовый'),('orange','Оранжевый'),('pink','Розовый'),('light','Светлая')] %}
+                {% for tk, tn in [('green','Зелёный'),('blue','Синий'),('purple','Фиолетовый'),('orange','Оранжевый'),('pink','Розовый'),('light','Светлая'),('amoled','AMOLED 🖤')] %}
                 <label class="theme-option theme-{{ tk }} {% if current_user.theme == tk %}active{% endif %}">
                     <input type="radio" name="theme" value="{{ tk }}" {% if current_user.theme == tk %}checked{% endif %}>
                     <div class="theme-preview">
