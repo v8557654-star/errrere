@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="profile-header">
+    {% if current_user.avatar %}
+        <img src="{{ url_for('static', filename='avatars/' + current_user.avatar) }}" class="profile-avatar-img" alt="avatar">
+    {% else %}
+        <div class="profile-avatar-big">{{ current_user.username[0]|upper }}</div>
+    {% endif %}
+    <div class="profile-info">
+        <h1>{{ current_user.username }}</h1>
+        <p class="profile-email">{{ current_user.email }}</p>
+        {% if current_user.bio %}
+            <p class="profile-bio">{{ current_user.bio }}</p>
+        {% endif %}
+        <p class="profile-date">📅 С нами с {{ current_user.created_at.strftime('%d.%m.%Y') }}</p>
+    </div>
+</div>
+
+<div class="profile-stats">
+    <div class="stat-card">
+        <div class="stat-num">{{ mods|length }}</div>
+        <div class="stat-label">📦 Модов</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ current_user.total_downloads }}</div>
+        <div class="stat-label">⬇ Скачиваний</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ current_user.total_likes }}</div>
+        <div class="stat-label">❤ Лайков</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ current_user.followers_count }}</div>
+        <div class="stat-label">👥 Подписчиков</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ current_user.following_count }}</div>
+        <div class="stat-label">📡 Подписок</div>
+    </div>
+</div>
+
+<h3 class="section-title">📦 Мои моды</h3>
+
+<div class="my-mods-grid">
+    {% for mod in mods %}
+    <div class="my-mod-card">
+        <div class="mod-category">{{ mod.category }}</div>
+        <a href="{{ url_for('mod_page', mod_id=mod.id) }}" class="my-mod-title">{{ mod.title }}</a>
+        <div class="my-mod-meta">
+            <span>MC {{ mod.mc_version }}</span>
+            <span>⬇ {{ mod.downloads }} ❤ {{ mod.likes_count }} 👁 {{ mod.views or 0 }}</span>
+        </div>
+        <form method="POST" action="{{ url_for('delete_mod', mod_id=mod.id) }}">
+            <button type="submit" class="btn-delete" onclick="return confirm('Удалить мод?')">🗑 Удалить</button>
+        </form>
+    </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h3>У тебя пока нет модов</h3>
+            <a href="{{ url_for('upload') }}" class="btn-download-big">Загрузить первый мод</a>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

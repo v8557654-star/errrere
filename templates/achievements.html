@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🏅 Достижения</h1>
+        <p class="page-subtitle">Получено {{ earned|length }} из {{ all_achievements|length }}</p>
+    </div>
+    <div class="stats-mini">
+        <div class="stat-mini">
+            <div class="stat-num">{{ ((earned|length / all_achievements|length) * 100)|int }}%</div>
+            <div class="stat-label">Прогресс</div>
+        </div>
+    </div>
+</div>
+
+<div class="achievements-grid">
+    {% for key, ach in all_achievements.items() %}
+    <div class="achievement {% if key in earned %}earned{% endif %}">
+        <div class="ach-icon">{{ ach.icon }}</div>
+        <div class="ach-info">
+            <div class="ach-name">{{ ach.name }}</div>
+            <div class="ach-desc">{{ ach.desc }}</div>
+        </div>
+        {% if key in earned %}
+            <div class="ach-badge">✓</div>
+        {% else %}
+            <div class="ach-lock">🔒</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

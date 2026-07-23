@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">📡 Лента подписок</h1>
+        <p class="page-subtitle">Новые моды от авторов, на которых ты подписан</p>
+    </div>
+    <div class="stats-mini">
+        <div class="stat-mini">
+            <div class="stat-num">{{ mods|length }}</div>
+            <div class="stat-label">Модов</div>
+        </div>
+    </div>
+</div>
+
+<div class="mods-grid">
+    {% for mod in mods %}
+    <div class="mod-card">
+        <div class="mod-card-header">
+            <div class="mod-category">{{ mod.category }}</div>
+            <div class="mod-mc-badge">MC {{ mod.mc_version }}</div>
+        </div>
+        <h3><a href="{{ url_for('mod_page', mod_id=mod.id) }}">{{ mod.title }}</a></h3>
+        <p class="mod-meta">
+            <span>v{{ mod.version }}</span> • <span>👤 {{ mod.author.username }}</span>
+        </p>
+        <p class="mod-desc">{{ mod.description[:120] }}{% if mod.description|length > 120 %}...{% endif %}</p>
+        <div class="mod-footer">
+            <div class="mod-stats">
+                <span>⬇ {{ mod.downloads }}</span>
+                <span>❤ {{ mod.likes_count }}</span>
+            </div>
+            <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download">Скачать</a>
+        </div>
+    </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📡</div>
+            <h3>Лента пуста</h3>
+            <p>Подпишись на интересных авторов!</p>
+            <a href="{{ url_for('index') }}" class="btn-download-big">Найти авторов</a>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

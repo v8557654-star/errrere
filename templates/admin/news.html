@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">📰 Новости</h1>
+    </div>
+</div>
+
+<div class="settings-card">
+    <h3>➕ Новая новость</h3>
+    <form method="POST">
+        <label>Заголовок</label>
+        <input type="text" name="title" required maxlength="200">
+        <label>Текст</label>
+        <textarea name="content" rows="6" required></textarea>
+        <button type="submit" class="btn-save">📢 Опубликовать</button>
+    </form>
+</div>
+
+<h3 class="section-title">Все новости</h3>
+
+<div class="news-list">
+    {% for n in news %}
+    <article class="news-item">
+        <div class="news-date">{{ n.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+        <h2>{{ n.title }}</h2>
+        <div class="news-content">{{ n.content }}</div>
+        <form method="POST" action="{{ url_for('admin_delete_news', news_id=n.id) }}" style="margin-top:10px;">
+            <button type="submit" class="admin-btn danger" onclick="return confirm('Удалить?')">🗑 Удалить</button>
+        </form>
+    </article>
+    {% endfor %}
+</div>
+{% endblock %}

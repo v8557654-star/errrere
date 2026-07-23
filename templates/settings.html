@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">⚙️ Настройки</h1>
+        <p class="page-subtitle">Настрой сайт под себя</p>
+    </div>
+</div>
+
+<div class="settings-grid">
+
+    <div class="settings-card">
+        <h3>🖼️ Аватарка</h3>
+        <p class="settings-desc">Загрузи свою аватарку (jpg, png, gif)</p>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="avatar">
+            <div class="avatar-upload">
+                {% if current_user.avatar %}
+                    <img src="{{ url_for('static', filename='avatars/' + current_user.avatar) }}" class="current-avatar" alt="avatar">
+                {% else %}
+                    <div class="current-avatar-letter">{{ current_user.username[0]|upper }}</div>
+                {% endif %}
+                <label class="file-label-small">
+                    📁 Выбрать файл
+                    <input type="file" name="avatar" accept="image/*" required onchange="this.form.submit()">
+                </label>
+            </div>
+        </form>
+    </div>
+
+    <div class="settings-card">
+        <h3>🎨 Тема оформления</h3>
+        <p class="settings-desc">Выбери цветовую схему сайта</p>
+        <form method="POST">
+            <input type="hidden" name="action" value="theme">
+            <div class="theme-grid">
+                {% for tk, tn in [('green','Зелёный'),('blue','Синий'),('purple','Фиолетовый'),('orange','Оранжевый'),('pink','Розовый'),('light','Светлая'),('amoled','AMOLED 🖤')] %}
+                <label class="theme-option theme-{{ tk }} {% if current_user.theme == tk %}active{% endif %}">
+                    <input type="radio" name="theme" value="{{ tk }}" {% if current_user.theme == tk %}checked{% endif %}>
+                    <div class="theme-preview">
+                        <div class="tp-bar"></div>
+                        <div class="tp-content"></div>
+                    </div>
+                    <div class="theme-name">{{ tn }}</div>
+                </label>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn-save">Сохранить тему</button>
+        </form>
+    </div>
+
+    <div class="settings-card">
+        <h3>✨ Анимации</h3>
+        <p class="settings-desc">Включи или выключи анимации интерфейса</p>
+        <form method="POST">
+            <input type="hidden" name="action" value="animations">
+            <label class="switch-row">
+                <span>Анимации интерфейса</span>
+                <label class="switch">
+                    <input type="checkbox" name="animations" {% if current_user.animations %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </label>
+            <button type="submit" class="btn-save">Сохранить</button>
+        </form>
+    </div>
+
+    <div class="settings-card">
+        <h3>👤 Профиль</h3>
+        <p class="settings-desc">Информация о тебе</p>
+        <form method="POST">
+            <input type="hidden" name="action" value="profile">
+            <label>Email</label>
+            <input type="email" name="email" value="{{ current_user.email }}">
+            <label>О себе</label>
+            <textarea name="bio" rows="3" maxlength="300" placeholder="Расскажи о себе...">{{ current_user.bio }}</textarea>
+            <button type="submit" class="btn-save">Сохранить профиль</button>
+        </form>
+    </div>
+
+    <div class="settings-card">
+        <h3>🔒 Пароль</h3>
+        <p class="settings-desc">Смени пароль для безопасности</p>
+        <form method="POST">
+            <input type="hidden" name="action" value="password">
+            <label>Текущий пароль</label>
+            <input type="password" name="old_password" required>
+            <label>Новый пароль</label>
+            <input type="password" name="new_password" required minlength="6">
+            <button type="submit" class="btn-save">Изменить пароль</button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

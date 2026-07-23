@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">📅 Активность {{ user.username }}</h1>
+    </div>
+</div>
+
+<div class="activity-list">
+    {% for a in acts %}
+    <a href="{{ a.link or '#' }}" class="activity-item">
+        <div class="act-icon">
+            {% if a.type == 'uploaded' %}📤
+            {% elif a.type == 'liked' %}❤️
+            {% elif a.type == 'commented' %}💬
+            {% elif a.type == 'subscribed' %}🔔
+            {% else %}📌
+            {% endif %}
+        </div>
+        <div class="act-body">
+            <div class="act-text">{{ a.text }}</div>
+            <div class="act-date">{{ a.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+        </div>
+    </a>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <h3>Нет активности</h3>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

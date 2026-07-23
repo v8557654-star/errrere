@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">📦 Все моды ({{ mods|length }})</h1>
+    </div>
+</div>
+
+<div class="admin-table-wrap">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Автор</th>
+                <th>Категория</th>
+                <th>MC</th>
+                <th>⬇</th>
+                <th>❤</th>
+                <th>👁</th>
+                <th>Дата</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in mods %}
+            <tr>
+                <td>{{ m.id }}</td>
+                <td><a href="{{ url_for('mod_page', mod_id=m.id) }}" class="author-link">{{ m.title }}</a></td>
+                <td><a href="{{ url_for('user_page', username=m.author.username) }}" class="author-link">{{ m.author.username }}</a></td>
+                <td>{{ m.category }}</td>
+                <td>{{ m.mc_version }}</td>
+                <td>{{ m.downloads }}</td>
+                <td>{{ m.likes_count }}</td>
+                <td>{{ m.views or 0 }}</td>
+                <td>{{ m.created_at.strftime('%d.%m.%Y') }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('admin_delete_mod', mod_id=m.id) }}" style="display:inline">
+                        <button type="submit" class="admin-btn danger" onclick="return confirm('Удалить мод?')">🗑</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

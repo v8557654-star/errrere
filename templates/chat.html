@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="chat-header">
+    <a href="{{ url_for('messages') }}" class="back-btn">← Назад</a>
+    <div class="chat-user">
+        {% if other.avatar %}
+            <img src="{{ url_for('static', filename='avatars/' + other.avatar) }}" class="chat-avatar" alt="">
+        {% else %}
+            <div class="chat-avatar-letter">{{ other.username[0]|upper }}</div>
+        {% endif %}
+        <a href="{{ url_for('user_page', username=other.username) }}" class="chat-username">{{ other.username }}</a>
+    </div>
+</div>
+
+<div class="chat-messages" id="chat-messages">
+    {% for m in msgs %}
+    <div class="msg {% if m.from_user_id == current_user.id %}msg-mine{% else %}msg-other{% endif %}">
+        <div class="msg-bubble">
+            <div class="msg-text">{{ m.text }}</div>
+            <div class="msg-time">{{ m.created_at.strftime('%H:%M') }}</div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">💬</div>
+        <h3>Начни диалог</h3>
+    </div>
+    {% endfor %}
+</div>
+
+<form method="POST" class="chat-form">
+    <input type="text" name="text" placeholder="Написать сообщение..." required maxlength="2000" autofocus>
+    <button type="submit">📤</button>
+</form>
+
+<script>
+const m = document.getElementById('chat-messages');
+if (m) m.scrollTop = m.scrollHeight;
+</script>
+{% endblock %}

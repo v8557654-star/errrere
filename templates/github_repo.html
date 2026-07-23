@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<a href="{{ url_for('github_search') }}" class="back-btn">← К поиску GitHub</a>
+
+<div class="mr-project gh-project">
+
+    <div class="mr-project-header">
+        <div class="mr-project-icon">
+            <img src="{{ repo.owner.avatar_url }}" alt="{{ repo.owner.login }}">
+        </div>
+        <div class="mr-project-info">
+            <h1>{{ repo.name }}</h1>
+            <p class="mr-project-desc">{{ repo.description or 'Без описания' }}</p>
+            <div class="mr-project-stats">
+                <span>⭐ {{ "{:,}".format(repo.stargazers_count).replace(",", " ") }}</span>
+                <span>🍴 {{ repo.forks_count }}</span>
+                <span>👁 {{ repo.watchers_count }}</span>
+                {% if repo.language %}<span class="gh-lang">{{ repo.language }}</span>{% endif %}
+                <span>📅 {{ repo.updated_at[:10] }}</span>
+            </div>
+
+            {% if repo.topics %}
+            <div class="mr-project-categories">
+                {% for topic in repo.topics %}
+                    <span class="mr-tag gh-tag">{{ topic }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mr-project-grid">
+        <div class="mr-project-body">
+            <div class="mod-description">
+                <h3>📖 README</h3>
+                {% if readme %}
+                <div class="mr-body-content gh-readme">{{ readme|safe }}</div>
+                {% else %}
+                <p>README не найден</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mr-project-sidebar">
+            <a href="{{ repo.html_url }}" target="_blank" class="btn-github">
+                🦊 Открыть на GitHub
+            </a>
+
+            {% if releases %}
+            <h3 class="mr-versions-title">📥 Скачать .jar</h3>
+            <div class="mr-versions-list">
+                {% for release in releases %}
+                    {% for asset in release.assets %}
+                        {% if asset.name.endswith('.jar') %}
+                        <a href="{{ asset.browser_download_url }}" class="mr-version-item gh-version-item" download target="_blank">
+                            <div class="mr-v-info">
+                                <div class="mr-v-name">{{ release.name or release.tag_name }}</div>
+                                <div class="mr-v-meta">
+                                    <span>{{ asset.name[:40] }}</span>
+                                    <span>⬇ {{ "{:,}".format(asset.download_count).replace(",", " ") }}</span>
+                                    <span>{{ (asset.size / 1024 / 1024)|round(1) }} МБ</span>
+                                </div>
+                            </div>
+                            <div class="mr-v-download">⬇</div>
+                        </a>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-releases">
+                <p>📦 Нет релизов с .jar файлами</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">Можешь склонировать репозиторий и собрать сам</p>
+            </div>
+            {% endif %}
+
+            <a href="{{ repo.clone_url }}" class="mr-extra-link" onclick="navigator.clipboard.writeText('{{ repo.clone_url }}'); event.preventDefault(); this.querySelector('.copy-text').textContent='✓ Скопировано'">
+                <span>📋</span>
+                <span class="copy-text">Copy git clone URL</span>
+            </a>
+
+            {% if repo.homepage %}
+            <a href="{{ repo.homepage }}" target="_blank" class="mr-extra-link">
+                <span>🌐</span> Веб-сайт
+            </a>
+            {% endif %}
+
+            <a href="{{ repo.html_url }}/issues" target="_blank" class="mr-extra-link">
+                <span>🐛</span> Issues ({{ repo.open_issues_count }})
+            </a>
+
+            <a href="{{ repo.html_url }}/wiki" target="_blank" class="mr-extra-link">
+                <span>📚</span> Wiki
+            </a>
+
+            {% if repo.license %}
+            <div class="gh-license">
+                <span>⚖️ Лицензия:</span>
+                <strong>{{ repo.license.name }}</strong>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
