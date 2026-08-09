@@ -56,9 +56,15 @@
         </div>
 
         <div class="mod-detail-sidebar">
+            {% if mod.versions %}
+            <button onclick="openDownloadModal()" class="btn-download-big">
+                ⬇ Скачать .jar
+            </button>
+            {% else %}
             <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download-big">
                 ⬇ Скачать .jar
             </a>
+            {% endif %}
             {% if current_user.is_authenticated %}
             <button class="btn-like {% if mod.is_liked_by(current_user) %}liked{% endif %}"
                     onclick="toggleLike({{ mod.id }})" id="likeBtn">
@@ -130,7 +136,145 @@
     <span class="lightbox-close">&times;</span>
 </div>
 
+<!-- Download Modal -->
+<div id="downloadModal" class="download-modal" onclick="closeDownloadModal(event)">
+    <div class="download-modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3>⬇ Скачать {{ mod.title }}</h3>
+            <button class="modal-close" onclick="closeDownloadModal(event)">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="download-form-group">
+                <label for="mcVersionSelect">Версия Minecraft:</label>
+                <select id="mcVersionSelect" onchange="updateLoaderOptions()">
+                    <option value="">Выберите версию MC</option>
+                </select>
+            </div>
+            <div class="download-form-group">
+                <label for="loaderSelect">Загрузчик (Loader):</label>
+                <select id="loaderSelect" onchange="updateVersionOptions()" disabled>
+                    <option value="">Сначала выберите MC</option>
+                </select>
+            </div>
+            <div class="download-form-group">
+                <label for="modVersionSelect">Версия мода:</label>
+                <select id="modVersionSelect" disabled>
+                    <option value="">Сначала выберите загрузчик</option>
+                </select>
+            </div>
+            <a href="#" id="finalDownloadBtn" class="btn-download-big" style="margin-top: 20px;" disabled>
+                Скачать выбранную версию
+            </a>
+        </div>
+    </div>
+</div>
+
 <script>
+// Данные версий из шаблона
+const modVersions = {{ mod.versions | tojson if mod.versions else [] }};
+
+function openDownloadModal() {
+    const modal = document.getElementById('downloadModal');
+    const mcSelect = document.getElementById('mcVersionSelect');
+    
+    // Заполняем версии MC
+    const mcVersions = [...new Set(modVersions.map(v => v.mc_version))];
+    mcSelect.innerHTML = '<option value="">Выберите версию MC</option>';
+    mcVersions.forEach(mc => {
+        mcSelect.innerHTML += `<option value="${mc}">${mc}</option>`;
+    });
+    
+    // Сбрасываем другие селекты
+    document.getElementById('loaderSelect').innerHTML = '<option value="">Сначала выберите MC</option>';
+    document.getElementById('loaderSelect').disabled = true;
+    document.getElementById('modVersionSelect').innerHTML = '<option value="">Сначала выберите загрузчик</option>';
+    document.getElementById('modVersionSelect').disabled = true;
+    document.getElementById('finalDownloadBtn').href = '#';
+    document.getElementById('finalDownloadBtn').setAttribute('disabled', 'true');
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDownloadModal(event) {
+    if (!event || event.target === document.getElementById('downloadModal')) {
+        document.getElementById('downloadModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+function updateLoaderOptions() {
+    const mcVersion = document.getElementById('mcVersionSelect').value;
+    const loaderSelect = document.getElementById('loaderSelect');
+    const modVersionSelect = document.getElementById('modVersionSelect');
+    
+    if (!mcVersion) {
+        loaderSelect.innerHTML = '<option value="">Сначала выберите MC</option>';
+        loaderSelect.disabled = true;
+        modVersionSelect.innerHTML = '<option value="">Сначала выберите загрузчик</option>';
+        modVersionSelect.disabled = true;
+        return;
+    }
+    
+    // Фильтруем по MC версии и получаем уникальные лоадеры
+    const filtered = modVersions.filter(v => v.mc_version === mcVersion);
+    const loaders = [...new Set(filtered.map(v => v.loader))];
+    
+    loaderSelect.innerHTML = '<option value="">Выберите загрузчик</option>';
+    loaders.forEach(loader => {
+        loaderSelect.innerHTML += `<option value="${loader}">${loader}</option>`;
+    });
+    loaderSelect.disabled = false;
+    
+    // Сбрасываем версию мода
+    modVersionSelect.innerHTML = '<option value="">Сначала выберите загрузчик</option>';
+    modVersionSelect.disabled = true;
+    document.getElementById('finalDownloadBtn').href = '#';
+    document.getElementById('finalDownloadBtn').setAttribute('disabled', 'true');
+}
+
+function updateVersionOptions() {
+    const mcVersion = document.getElementById('mcVersionSelect').value;
+    const loader = document.getElementById('loaderSelect').value;
+    const modVersionSelect = document.getElementById('modVersionSelect');
+    
+    if (!mcVersion || !loader) {
+        modVersionSelect.innerHTML = '<option value="">Сначала выберите загрузчик</option>';
+        modVersionSelect.disabled = true;
+        return;
+    }
+    
+    // Фильтруем по MC и лоадеру
+    const filtered = modVersions.filter(v => v.mc_version === mcVersion && v.loader === loader);
+    
+    modVersionSelect.innerHTML = '<option value="">Выберите версию мода</option>';
+    filtered.forEach(v => {
+        modVersionSelect.innerHTML += `<option value="${v.id}" data-filename="${v.filename}">${v.version}</option>`;
+    });
+    modVersionSelect.disabled = false;
+    
+    // Сбрасываем кнопку скачивания
+    document.getElementById('finalDownloadBtn').href = '#';
+    document.getElementById('finalDownloadBtn').setAttribute('disabled', 'true');
+}
+
+// Обработчик выбора версии мода
+document.getElementById('modVersionSelect')?.addEventListener('change', function() {
+    const versionId = this.value;
+    const modId = {{ mod.id }};
+    const downloadBtn = document.getElementById('finalDownloadBtn');
+    
+    if (versionId) {
+        downloadBtn.href = `/download/${modId}/${versionId}`;
+        downloadBtn.removeAttribute('disabled');
+        downloadBtn.textContent = '⬇ Скачать выбранную версию';
+    } else {
+        downloadBtn.href = '#';
+        downloadBtn.setAttribute('disabled', 'true');
+        downloadBtn.textContent = 'Скачать выбранную версию';
+    }
+});
+
 async function toggleLike(modId) {
     try {
         const response = await fetch(`/like/${modId}`, {method: 'POST'});

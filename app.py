@@ -118,6 +118,7 @@ class Mod(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     likes = db.relationship('Like', backref='mod', lazy=True, cascade='all, delete-orphan')
     comments = db.relationship('Comment', backref='mod', lazy=True, cascade='all, delete-orphan')
+    versions = db.relationship('ModVersion', backref='mod', lazy=True, cascade='all, delete-orphan')
 
     @property
     def likes_count(self): return len(self.likes)
@@ -137,6 +138,16 @@ class Like(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     mod_id = db.Column(db.Integer, db.ForeignKey('mod.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class ModVersion(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    mod_id = db.Column(db.Integer, db.ForeignKey('mod.id'), nullable=False)
+    version = db.Column(db.String(20), nullable=False)
+    mc_version = db.Column(db.String(20), nullable=False)
+    loader = db.Column(db.String(30), nullable=False)  # Forge, Fabric, Quilt, NeoForge
+    filename = db.Column(db.String(300), nullable=False)
+    downloads = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Comment(db.Model):
@@ -430,6 +441,18 @@ def upload(content_type='mod'):
             content_type=content_type
         )
         db.session.add(mod); db.session.flush()
+        
+        # Создаем запись версии мода если указан loader
+        loader = request.form.get('loader', 'Vanilla')
+        if loader:
+            mod_version = ModVersion(
+                mod_id=mod.id,
+                version=request.form['version'],
+                mc_version=request.form['mc_version'],
+                loader=loader,
+                filename=unique_name
+            )
+            db.session.add(mod_version)
         log_activity(current_user.id, 'uploaded', f'Опубликовал мод "{mod.title}"', url_for('mod_page', mod_id=mod.id))
         subs = Subscription.query.filter_by(author_id=current_user.id).all()
         for s in subs:
@@ -512,10 +535,26 @@ def subscribe(user_id):
 @app.route('/download/<int:mod_id>')
 def download(mod_id):
     mod = Mod.query.get_or_404(mod_id)
+    # Если есть версии, перенаправляем на страницу выбора версии
+    if mod.versions:
+        return redirect(url_for('mod_page', mod_id=mod_id))
     mod.downloads += 1
     db.session.commit()
     return send_from_directory(app.config['UPLOAD_FOLDER'], mod.filename,
                                as_attachment=True, download_name=mod.filename.split('_', 2)[-1])
+
+@app.route('/download/<int:mod_id>/<int:version_id>')
+def download_version(mod_id, version_id):
+    mod = Mod.query.get_or_404(mod_id)
+    mod_version = ModVersion.query.get_or_404(version_id)
+    # Проверка что версия принадлежит моду
+    if mod_version.mod_id != mod_id:
+        abort(404)
+    mod_version.downloads += 1
+    mod.downloads += 1
+    db.session.commit()
+    return send_from_directory(app.config['UPLOAD_FOLDER'], mod_version.filename,
+                               as_attachment=True, download_name=mod_version.filename.split('_', 3)[-1])
 
 @app.route('/like/<int:mod_id>', methods=['POST'])
 @login_required
