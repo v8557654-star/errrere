@@ -1,0 +1,68 @@
+{
+  "mods": [
+    {
+      "id": "better-swords",
+      "name": "Better Swords",
+      "description": "Добавляет новые виды мечей с уникальными характеристиками и эффектами.",
+      "icon": "assets/icons/sword.png",
+      "author": "ModMaker",
+      "downloads": 15420,
+      "rating": 4.8,
+      "tags": ["combat", "weapons", "rpg"],
+      "versions": [
+        {
+          "modVersion": "1.2.0",
+          "mcVersions": ["1.20.1", "1.20.4", "1.21"],
+          "loaders": ["forge", "fabric", "neoforge"],
+          "fileUrl": "https://github.com/user/mods/releases/download/v1.2.0/better-swords-1.2.0.jar",
+          "changelog": "Добавлен огненный меч, улучшен баланс."
+        },
+        {
+          "modVersion": "1.1.5",
+          "mcVersions": ["1.19.2", "1.20.1"],
+          "loaders": ["forge", "fabric"],
+          "fileUrl": "https://github.com/user/mods/releases/download/v1.1.5/better-swords-1.1.5.jar",
+          "changelog": "Исправлены баги с текстурами."
+        }
+      ]
+    },
+    {
+      "id": "magic-spells",
+      "name": "Magic Spells",
+      "description": "Система магии с заклинаниями, посохами и мана-баром.",
+      "icon": "assets/icons/magic.png",
+      "author": "WizardDev",
+      "downloads": 28500,
+      "rating": 4.9,
+      "tags": ["magic", "rpg", "adventure"],
+      "versions": [
+        {
+          "modVersion": "2.0.1",
+          "mcVersions": ["1.20.1", "1.20.4"],
+          "loaders": ["forge", "neoforge"],
+          "fileUrl": "https://github.com/user/mods/releases/download/v2.0.1/magic-spells-2.0.1.jar",
+          "changelog": "Новая школа магии льда."
+        }
+      ]
+    },
+    {
+      "id": "tech-industry",
+      "name": "Tech Industry",
+      "description": "Технологический мод с автомацией, генераторами и роботами.",
+      "icon": "assets/icons/tech.png",
+      "author": "EngineerPro",
+      "downloads": 42100,
+      "rating": 4.7,
+      "tags": ["tech", "automation", "industry"],
+      "versions": [
+        {
+          "modVersion": "3.5.0",
+          "mcVersions": ["1.20.1", "1.21"],
+          "loaders": ["forge", "fabric", "quilt"],
+          "fileUrl": "https://github.com/user/mods/releases/download/v3.5.0/tech-industry-3.5.0.jar",
+          "changelog": "Добавлены квантовые генераторы."
+        }
+      ]
+    }
+  ]
+}
