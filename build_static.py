@@ -121,6 +121,11 @@ _ICONS = {
     'refresh': '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
     'fork': '<circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"/><path d="M12 12v3"/>',
     'check': '<polyline points="20 6 9 17 4 12"/>',
+    'plus': '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+    'shuffle': '<polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/>',
+    'share': '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>',
+    'link': '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+    'compare': '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>',
 }
 _FILL = {'github_fill'}
 
@@ -270,12 +275,16 @@ def copy_assets():
 
 def mod_card(m):
     tags_h = ''.join('<span class="tag">#%s</span>' % t for t in m['tags'][:3])
-    return '''        <div class="mod-card" data-title="{title}" data-desc="{desc}" data-category="{category}"
+    return '''        <div class="mod-card" data-id="{id}" data-author="{author}" data-version="{version}"
+             data-title="{title}" data-desc="{desc}" data-category="{category}"
              data-mc="{mc}" data-tags="{tags_flat}" data-downloads="{downloads}" data-likes="{likes}"
              data-views="{views}" data-date="{date}">
             <div class="mod-card-header">
                 <div class="mod-category">{category}</div>
-                <div class="mod-mc-badge">MC {mc}</div>
+                <div class="mod-card-header-right">
+                    <div class="mod-mc-badge">MC {mc}</div>
+                    <button class="cmp-toggle" data-cmp="{id}" title="Добавить к сравнению" aria-pressed="false">{ic_plus}</button>
+                </div>
             </div>
             <h3><a href="mod.html?m={id}">{title}</a></h3>
             <p class="mod-meta"><span>v{version}</span> <span>•</span> <span><a href="user.html?u={author}" class="author-link">{ic_user} {author}</a></span></p>
@@ -291,7 +300,7 @@ def mod_card(m):
             </div>
         </div>'''.format(tags_flat=' '.join(m['tags']), tags_h=tags_h,
                           ic_dl=ic('download', 'ic-sm'), ic_heart=ic('heart', 'ic-sm'), ic_eye=ic('eye', 'ic-sm'),
-                          ic_user=ic('user', 'ic-sm'), **m)
+                          ic_user=ic('user', 'ic-sm'), ic_plus=ic('plus', 'ic-sm'), **m)
 
 
 # ======================================================================
@@ -337,6 +346,7 @@ def build_index():
     <div class="hero-actions">
         <a href="#mods" class="btn-hero btn-hero-primary">''' + ic('package') + ''' Смотреть моды</a>
         <a href="#about" class="btn-hero btn-hero-ghost">О проекте</a>
+        <a href="#" id="randomBtn" class="btn-hero btn-hero-ghost">''' + ic('shuffle') + ''' Случайный мод</a>
     </div>
 
     <div class="stats-grid">
@@ -368,6 +378,11 @@ def build_index():
         <a href="news.html" class="news-all">Все ''' + ic('arrow_right', 'ic-sm') + '''</a>
     </div>
 </div>
+
+<section id="recentSection" class="recent-section mb-16 animate-fade-in-up" style="display:none">
+    <h2 class="section-heading">''' + ic('clock') + ''' Недавно просмотренные</h2>
+    <div class="recent-grid" id="recentGrid"></div>
+</section>
 
 <div class="top-section animate-fade-in-up">
     <h2 class="section-title">''' + ic('trophy') + ''' Топ модов</h2>
@@ -418,6 +433,31 @@ def build_index():
         </div>
     </div>
 </section>
+
+<!-- Панель сравнения модов -->
+<div id="compareBar" class="compare-bar">
+    <div class="compare-bar-inner">
+        <span class="compare-bar-label">''' + ic('compare') + ''' Сравнение</span>
+        <div class="compare-chips" id="compareChips"></div>
+        <div class="compare-bar-actions">
+            <button id="compareClear" class="compare-clear">Очистить</button>
+            <button id="compareGo" class="btn-download">Сравнить</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно сравнения -->
+<div id="compareModal" class="download-modal compare-modal">
+    <div class="compare-modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3>''' + ic('compare') + ''' Сравнение модов</h3>
+            <button class="modal-close" onclick="MM.closeCompare()">''' + ic('x') + '''</button>
+        </div>
+        <div class="compare-table-wrap">
+            <table class="compare-table" id="compareTable"></table>
+        </div>
+    </div>
+</div>
 
 <!-- О проекте -->
 <section id="about" class="mb-16 animate-fade-in-up">
@@ -549,6 +589,10 @@ def build_mod():
                 <span class="like-icon">''' + ic('heart') + '''</span>
                 <span class="like-text">Лайкнуть</span>
                 <span class="like-count">932</span>
+            </button>
+            <button class="btn-share" id="shareBtn">
+                <span class="share-icon">''' + ic('share') + '''</span>
+                <span>Поделиться</span>
             </button>
 
             <div class="mod-quick-info">
