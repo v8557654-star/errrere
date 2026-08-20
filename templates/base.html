@@ -3,10 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MineMods — лучшая платформа для поиска и загрузки модов для Minecraft">
+    <meta name="theme-color" content="#22ff88">
     <title>MineMods — Моды для Minecraft</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://github.com">
+    <link rel="dns-prefetch" href="https://modrinth.com">
 </head>
 <body>
+<a href="#main-content" class="skip-link">Перейти к основному контенту</a>
 
 <div class="layout">
     <aside class="sidebar">
@@ -17,100 +23,100 @@
             </a>
         </div>
 
-        <nav class="sidebar-nav">
-            <a href="{{ url_for('index') }}" class="nav-item">
-                <span class="nav-icon">🏠</span><span>Каталог</span>
+        <nav class="sidebar-nav" role="navigation" aria-label="Боковая навигация">
+            <a href="{{ url_for('index') }}" class="nav-item" aria-label="Каталог модов">
+                <span class="nav-icon" aria-hidden="true">🏠</span><span>Каталог</span>
             </a>
-            <a href="{{ url_for('news_list') }}" class="nav-item">
-                <span class="nav-icon">📰</span><span>Новости</span>
+            <a href="{{ url_for('news_list') }}" class="nav-item" aria-label="Новости сайта">
+                <span class="nav-icon" aria-hidden="true">📰</span><span>Новости</span>
             </a>
-            <a href="{{ url_for('modrinth_search') }}" class="nav-item modrinth-item">
-                <span class="nav-icon">🌍</span><span>Modrinth</span>
+            <a href="{{ url_for('modrinth_search') }}" class="nav-item modrinth-item" aria-label="Поиск на Modrinth">
+                <span class="nav-icon" aria-hidden="true">🌍</span><span>Modrinth</span>
             </a>
-            <a href="{{ url_for('github_search') }}" class="nav-item github-item">
-                <span class="nav-icon">🦊</span><span>GitHub</span>
+            <a href="{{ url_for('github_search') }}" class="nav-item github-item" aria-label="Поиск на GitHub">
+                <span class="nav-icon" aria-hidden="true">🦊</span><span>GitHub</span>
             </a>
             {% if current_user.is_authenticated %}
-            <a href="{{ url_for('feed') }}" class="nav-item">
-                <span class="nav-icon">📡</span><span>Подписки</span>
+            <a href="{{ url_for('feed') }}" class="nav-item" aria-label="Лента подписок">
+                <span class="nav-icon" aria-hidden="true">📡</span><span>Подписки</span>
             </a>
-            <a href="{{ url_for('favorites') }}" class="nav-item">
-                <span class="nav-icon">❤️</span><span>Избранное</span>
+            <a href="{{ url_for('favorites') }}" class="nav-item" aria-label="Избранные моды">
+                <span class="nav-icon" aria-hidden="true">❤️</span><span>Избранное</span>
             </a>
-            <a href="{{ url_for('upload') }}" class="nav-item">
-                <span class="nav-icon">📤</span><span>Загрузить</span>
+            <a href="{{ url_for('upload') }}" class="nav-item" aria-label="Загрузить мод">
+                <span class="nav-icon" aria-hidden="true">📤</span><span>Загрузить</span>
             </a>
-            <a href="{{ url_for('achievements') }}" class="nav-item">
-                <span class="nav-icon">🏅</span><span>Достижения</span>
+            <a href="{{ url_for('achievements') }}" class="nav-item" aria-label="Мои достижения">
+                <span class="nav-icon" aria-hidden="true">🏅</span><span>Достижения</span>
             </a>
             {% if is_admin %}
-            <div class="nav-divider">АДМИН</div>
-            <a href="{{ url_for('admin_dashboard') }}" class="nav-item admin-item">
-                <span class="nav-icon">📊</span><span>Статистика</span>
+            <div class="nav-section-title" role="separator">АДМИН</div>
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-item admin-item" aria-label="Админ панель - статистика">
+                <span class="nav-icon" aria-hidden="true">📊</span><span>Статистика</span>
             </a>
-            <a href="{{ url_for('admin_users') }}" class="nav-item admin-item">
-                <span class="nav-icon">👥</span><span>Пользователи</span>
+            <a href="{{ url_for('admin_users') }}" class="nav-item admin-item" aria-label="Управление пользователями">
+                <span class="nav-icon" aria-hidden="true">👥</span><span>Пользователи</span>
             </a>
-            <a href="{{ url_for('admin_mods') }}" class="nav-item admin-item">
-                <span class="nav-icon">📦</span><span>Все моды</span>
+            <a href="{{ url_for('admin_mods') }}" class="nav-item admin-item" aria-label="Управление модами">
+                <span class="nav-icon" aria-hidden="true">📦</span><span>Все моды</span>
             </a>
-            <a href="{{ url_for('admin_news') }}" class="nav-item admin-item">
-                <span class="nav-icon">📰</span><span>Новости</span>
+            <a href="{{ url_for('admin_news') }}" class="nav-item admin-item" aria-label="Управление новостями">
+                <span class="nav-icon" aria-hidden="true">📰</span><span>Новости</span>
             </a>
             {% endif %}
             {% endif %}
         </nav>
     </aside>
 
-    <main class="main-content">
-        <header class="topbar">
-            <button class="mobile-menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+    <main class="main-content" id="main-content">
+        <header class="topbar" role="banner">
+            <button class="mobile-menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Меню">☰</button>
 
-            <div class="topbar-right">
+            <div class="topbar-right" role="navigation" aria-label="Основная навигация">
                 {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('notifications') }}" class="topbar-icon" title="Уведомления">
+                    <a href="{{ url_for('notifications') }}" class="topbar-icon" title="Уведомления" aria-label="Уведомления">
                         🔔
                         {% if unread_notif > 0 %}<span class="topbar-badge">{{ unread_notif }}</span>{% endif %}
                     </a>
-                    <a href="{{ url_for('messages') }}" class="topbar-icon" title="Сообщения">
+                    <a href="{{ url_for('messages') }}" class="topbar-icon" title="Сообщения" aria-label="Сообщения">
                         💌
                         {% if unread_msg > 0 %}<span class="topbar-badge">{{ unread_msg }}</span>{% endif %}
                     </a>
 
-                    <div class="user-menu">
-                        <button class="user-menu-btn" onclick="document.querySelector('.user-dropdown').classList.toggle('open')">
+                    <div class="user-menu" role="menu">
+                        <button class="user-menu-btn" onclick="document.querySelector('.user-dropdown').classList.toggle('open')" aria-haspopup="true" aria-expanded="false">
                             {% if current_user.avatar %}
-                                <img src="{{ url_for('static', filename='avatars/' + current_user.avatar) }}" class="topbar-avatar" alt="avatar">
+                                <img src="{{ url_for('static', filename='avatars/' + current_user.avatar) }}" class="topbar-avatar" alt="Аватар {{ current_user.username }}">
                             {% else %}
-                                <div class="topbar-avatar-letter">{{ current_user.username[0]|upper }}</div>
+                                <div class="topbar-avatar-letter" aria-hidden="true">{{ current_user.username[0]|upper }}</div>
                             {% endif %}
                             <span class="user-menu-name">{{ current_user.username }}{% if is_admin %} 👑{% endif %}</span>
-                            <span class="dropdown-arrow">▼</span>
+                            <span class="dropdown-arrow" aria-hidden="true">▼</span>
                         </button>
-                        <div class="user-dropdown">
-                            <a href="{{ url_for('profile') }}" class="dropdown-item">
-                                <span>👤</span> Профиль
+                        <div class="user-dropdown" role="menu">
+                            <a href="{{ url_for('profile') }}" class="dropdown-item" role="menuitem">
+                                <span aria-hidden="true">👤</span> Профиль
                             </a>
-                            <a href="{{ url_for('settings') }}" class="dropdown-item">
-                                <span>⚙️</span> Настройки
+                            <a href="{{ url_for('settings') }}" class="dropdown-item" role="menuitem">
+                                <span aria-hidden="true">⚙️</span> Настройки
                             </a>
-                            <a href="{{ url_for('activity', username=current_user.username) }}" class="dropdown-item">
-                                <span>📅</span> Активность
+                            <a href="{{ url_for('activity', username=current_user.username) }}" class="dropdown-item" role="menuitem">
+                                <span aria-hidden="true">📅</span> Активность
                             </a>
                             {% if is_admin %}
-                            <a href="{{ url_for('admin_dashboard') }}" class="dropdown-item">
-                                <span>👑</span> Админ-панель
+                            <a href="{{ url_for('admin_dashboard') }}" class="dropdown-item" role="menuitem">
+                                <span aria-hidden="true">👑</span> Админ-панель
                             </a>
                             {% endif %}
-                            <div class="dropdown-divider"></div>
-                            <a href="{{ url_for('logout') }}" class="dropdown-item logout">
-                                <span>🚪</span> Выйти
+                            <div class="dropdown-divider" role="separator"></div>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item logout" role="menuitem">
+                                <span aria-hidden="true">🚪</span> Выйти
                             </a>
                         </div>
                     </div>
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="topbar-btn">Войти</a>
-                    <a href="{{ url_for('register') }}" class="topbar-btn topbar-btn-primary">Регистрация</a>
+                    <a href="{{ url_for('login') }}" class="topbar-btn" aria-label="Войти">Войти</a>
+                    <a href="{{ url_for('register') }}" class="topbar-btn topbar-btn-primary" aria-label="Регистрация">Регистрация</a>
                 {% endif %}
             </div>
         </header>

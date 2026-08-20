@@ -1,8 +1,47 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<!-- Hero Section -->
+<section class="hero-section mb-16 text-center animate-fade-in">
+    <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+        Лучшие моды для Minecraft
+    </h1>
+    <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+        Откройте для себя тысячи модов, улучшающих ваш игровой опыт. 
+        От технологических чудес до магических приключений.
+    </p>
+    <div class="flex justify-center gap-4 flex-wrap">
+        <a href="#mods" class="btn-primary px-8 py-3 rounded-full font-semibold transition-all hover:scale-105">
+            Смотреть моды
+        </a>
+        <a href="#about" class="btn-secondary px-8 py-3 rounded-full font-semibold transition-all hover:scale-105">
+            О проекте
+        </a>
+    </div>
+    
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12 max-w-4xl mx-auto">
+        <div class="stat-card p-6 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10">
+            <div class="text-3xl font-bold text-blue-400 counter" data-target="{{ mods|length }}">0</div>
+            <div class="text-gray-400">Модов</div>
+        </div>
+        <div class="stat-card p-6 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10">
+            <div class="text-3xl font-bold text-purple-400 counter" data-target="50000">0</div>
+            <div class="text-gray-400">Скачиваний</div>
+        </div>
+        <div class="stat-card p-6 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10">
+            <div class="text-3xl font-bold text-green-400 counter" data-target="1200">0</div>
+            <div class="text-gray-400">Пользователей</div>
+        </div>
+        <div class="stat-card p-6 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10">
+            <div class="text-3xl font-bold text-yellow-400 counter" data-target="98">0</div>
+            <div class="text-gray-400">% Положительных</div>
+        </div>
+    </div>
+</section>
+
 {% if latest_news %}
-<div class="news-banner">
+<div class="news-banner mb-8 animate-fade-in-up">
     <h3>📰 Последние новости</h3>
     <div class="news-strip">
         {% for n in latest_news %}
@@ -17,7 +56,7 @@
 {% endif %}
 
 {% if top_mods %}
-<div class="top-section">
+<div class="top-section mb-12 animate-fade-in-up">
     <h2 class="section-title">🏆 Топ модов</h2>
     <div class="top-grid">
         {% for mod in top_mods %}
@@ -38,43 +77,47 @@
 </div>
 {% endif %}
 
-<div class="page-header">
-    <div>
-        <h1 class="page-title">Каталог модов</h1>
-        <p class="page-subtitle">Найди лучшие моды для Minecraft</p>
-    </div>
-    <div class="stats-mini">
-        <div class="stat-mini">
-            <div class="stat-num">{{ mods|length }}</div>
-            <div class="stat-label">Модов</div>
+<!-- Search and Filters -->
+<section class="mb-12 animate-fade-in-up">
+    <div class="max-w-4xl mx-auto">
+        <div class="search-bar">
+            <form method="GET" action="{{ url_for('index') }}">
+                <div class="search-input-wrap relative">
+                    <span class="search-icon absolute left-4 top-1/2 -translate-y-1/2">🔍</span>
+                    <input type="text" name="q" placeholder="Поиск по названию, описанию, тегам..." value="{{ search }}" 
+                           class="w-full pl-12 pr-4 py-4 rounded-xl bg-white/10 border border-white/20 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white placeholder-gray-400">
+                </div>
+                <select name="category" class="px-4 py-4 rounded-xl bg-white/10 border border-white/20 focus:border-blue-500 focus:outline-none text-white">
+                    <option value="">Все категории</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {% if sel_category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+                <select name="mc_version" class="px-4 py-4 rounded-xl bg-white/10 border border-white/20 focus:border-blue-500 focus:outline-none text-white">
+                    <option value="">Все версии</option>
+                    {% for v in versions %}
+                        <option value="{{ v }}" {% if sel_version == v %}selected{% endif %}>{{ v }}</option>
+                    {% endfor %}
+                </select>
+                <input type="hidden" name="sort" value="{{ sort }}">
+                <button type="submit" class="btn-primary px-6 py-4 rounded-xl font-semibold">Найти</button>
+            </form>
+        </div>
+        
+        <!-- Tags Filter -->
+        <div class="flex flex-wrap gap-2 justify-center mt-6" id="tagsContainer">
+            <button class="tag-btn active px-4 py-2 rounded-full text-sm font-medium transition-all bg-blue-600 text-white" data-tag="all">Все</button>
+            <button class="tag-btn px-4 py-2 rounded-full text-sm font-medium transition-all bg-white/10 text-gray-300 hover:bg-white/20" data-tag="combat">Боевые</button>
+            <button class="tag-btn px-4 py-2 rounded-full text-sm font-medium transition-all bg-white/10 text-gray-300 hover:bg-white/20" data-tag="tech">Технологии</button>
+            <button class="tag-btn px-4 py-2 rounded-full text-sm font-medium transition-all bg-white/10 text-gray-300 hover:bg-white/20" data-tag="magic">Магия</button>
+            <button class="tag-btn px-4 py-2 rounded-full text-sm font-medium transition-all bg-white/10 text-gray-300 hover:bg-white/20" data-tag="rpg">RPG</button>
+            <button class="tag-btn px-4 py-2 rounded-full text-sm font-medium transition-all bg-white/10 text-gray-300 hover:bg-white/20" data-tag="adventure">Приключения</button>
         </div>
     </div>
-</div>
+</section>
 
-<div class="search-bar">
-    <form method="GET" action="{{ url_for('index') }}">
-        <div class="search-input-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="text" name="q" placeholder="Поиск по названию, описанию, тегам..." value="{{ search }}">
-        </div>
-        <select name="category">
-            <option value="">Все категории</option>
-            {% for cat in categories %}
-                <option value="{{ cat }}" {% if sel_category == cat %}selected{% endif %}>{{ cat }}</option>
-            {% endfor %}
-        </select>
-        <select name="mc_version">
-            <option value="">Все версии</option>
-            {% for v in versions %}
-                <option value="{{ v }}" {% if sel_version == v %}selected{% endif %}>{{ v }}</option>
-            {% endfor %}
-        </select>
-        <input type="hidden" name="sort" value="{{ sort }}">
-        <button type="submit">Найти</button>
-    </form>
-</div>
-
-<div class="sort-tabs">
+<!-- Sort Tabs -->
+<div class="sort-tabs mb-8 animate-fade-in-up">
     <a href="{{ url_for('index', q=search, category=sel_category, mc_version=sel_version, sort='new') }}"
        class="sort-tab {% if sort == 'new' %}active{% endif %}">🆕 Новые</a>
     <a href="{{ url_for('index', q=search, category=sel_category, mc_version=sel_version, sort='popular') }}"
@@ -85,39 +128,124 @@
        class="sort-tab {% if sort == 'views' %}active{% endif %}">👁 Просмотры</a>
 </div>
 
-<div class="mods-grid">
-    {% for mod in mods %}
-    <div class="mod-card">
-        <div class="mod-card-header">
-            <div class="mod-category">{{ mod.category }}</div>
-            <div class="mod-mc-badge">MC {{ mod.mc_version }}</div>
-        </div>
-        <h3><a href="{{ url_for('mod_page', mod_id=mod.id) }}">{{ mod.title }}</a></h3>
-        <p class="mod-meta">
-            <span>v{{ mod.version }}</span>
-            <span>•</span>
-            <span>👤 {{ mod.author.username }}</span>
-        </p>
-        <p class="mod-desc">{{ mod.description[:120] }}{% if mod.description|length > 120 %}...{% endif %}</p>
-        {% if mod.tags_list %}
-        <div class="mod-tags">
-            {% for tag in mod.tags_list[:3] %}<span class="tag">#{{ tag }}</span>{% endfor %}
-        </div>
-        {% endif %}
-        <div class="mod-footer">
-            <div class="mod-stats">
-                <span class="stat-item">⬇ {{ mod.downloads }}</span>
-                <span class="stat-item">❤ {{ mod.likes_count }}</span>
-                <span class="stat-item">👁 {{ mod.views or 0 }}</span>
+<!-- Mods Grid -->
+<section id="mods" class="mb-16">
+    <h2 class="text-3xl font-bold mb-8 text-center">Каталог модов</h2>
+    <div class="mods-grid">
+        {% for mod in mods %}
+        <div class="mod-card animate-fade-in-up">
+            <div class="mod-card-header">
+                <div class="mod-category">{{ mod.category }}</div>
+                <div class="mod-mc-badge">MC {{ mod.mc_version }}</div>
             </div>
-            <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download">Скачать</a>
+            <h3><a href="{{ url_for('mod_page', mod_id=mod.id) }}">{{ mod.title }}</a></h3>
+            <p class="mod-meta">
+                <span>v{{ mod.version }}</span>
+                <span>•</span>
+                <span>👤 {{ mod.author.username }}</span>
+            </p>
+            <p class="mod-desc">{{ mod.description[:120] }}{% if mod.description|length > 120 %}...{% endif %}</p>
+            {% if mod.tags_list %}
+            <div class="mod-tags">
+                {% for tag in mod.tags_list[:3] %}<span class="tag">#{{ tag }}</span>{% endfor %}
+            </div>
+            {% endif %}
+            <div class="mod-footer">
+                <div class="mod-stats">
+                    <span class="stat-item">⬇ {{ mod.downloads }}</span>
+                    <span class="stat-item">❤ {{ mod.likes_count }}</span>
+                    <span class="stat-item">👁 {{ mod.views or 0 }}</span>
+                </div>
+                <a href="{{ url_for('download', mod_id=mod.id) }}" class="btn-download">Скачать</a>
+            </div>
+        </div>
+        {% else %}
+            <div class="empty-state col-span-full">
+                <div class="empty-icon">📦</div>
+                <h3>Ничего не найдено</h3>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="mb-16 animate-fade-in-up">
+    <div class="max-w-4xl mx-auto bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+        <h2 class="text-3xl font-bold mb-6 text-center">О проекте</h2>
+        <div class="prose prose-invert max-w-none">
+            <p class="text-gray-300 mb-4">
+                Наш сайт предоставляет удобный каталог модов для Minecraft с поддержкой различных версий игры и загрузчиков.
+                Мы стремимся сделать процесс поиска и установки модов максимально простым и приятным.
+            </p>
+            <div class="grid md:grid-cols-2 gap-6 mt-8">
+                <div class="feature-card p-6 rounded-xl bg-white/5 border border-white/10">
+                    <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Быстрая загрузка</h3>
+                    <p class="text-gray-400">Оптимизированная система доставки файлов обеспечивает максимальную скорость скачивания.</p>
+                </div>
+                <div class="feature-card p-6 rounded-xl bg-white/5 border border-white/10">
+                    <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Проверенные моды</h3>
+                    <p class="text-gray-400">Все моды проходят проверку на безопасность и совместимость перед публикацией.</p>
+                </div>
+            </div>
         </div>
     </div>
-    {% else %}
-        <div class="empty-state">
-            <div class="empty-icon">📦</div>
-            <h3>Ничего не найдено</h3>
+</section>
+
+<!-- FAQ Section -->
+<section id="faq" class="mb-16 animate-fade-in-up">
+    <div class="max-w-4xl mx-auto">
+        <h2 class="text-3xl font-bold mb-8 text-center">Частые вопросы</h2>
+        <div class="space-y-4">
+            <details class="group bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
+                <summary class="flex justify-between items-center cursor-pointer p-6 font-semibold">
+                    <span>Как установить мод?</span>
+                    <svg class="w-5 h-5 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </summary>
+                <div class="px-6 pb-6 text-gray-300">
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li>Выберите нужную версию Minecraft и загрузчик (Forge/Fabric)</li>
+                        <li>Скачайте файл мода</li>
+                        <li>Поместите файл в папку <code class="bg-white/10 px-2 py-1 rounded">mods</code> в директории игры</li>
+                        <li>Запустите Minecraft с выбранным загрузчиком</li>
+                    </ol>
+                </div>
+            </details>
+            <details class="group bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
+                <summary class="flex justify-between items-center cursor-pointer p-6 font-semibold">
+                    <span>Какие версии Minecraft поддерживаются?</span>
+                    <svg class="w-5 h-5 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </summary>
+                <div class="px-6 pb-6 text-gray-300">
+                    Мы поддерживаем версии от 1.16.5 до последних релизов 1.21+. Каждый мод указывает совместимые версии в описании.
+                </div>
+            </details>
+            <details class="group bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
+                <summary class="flex justify-between items-center cursor-pointer p-6 font-semibold">
+                    <span>Безопасно ли скачивать моды здесь?</span>
+                    <svg class="w-5 h-5 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </summary>
+                <div class="px-6 pb-6 text-gray-300">
+                    Да, все моды проходят проверку на вирусы и вредоносное ПО. Мы размещаем файлы только из проверенных источников.
+                </div>
+            </details>
         </div>
-    {% endfor %}
-</div>
+    </div>
+</section>
+
 {% endblock %}
