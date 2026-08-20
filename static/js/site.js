@@ -73,7 +73,12 @@
         fork: '<circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"/><path d="M12 12v3"/>',
         layers: '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
         file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
-        gamepad: '<line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.59C2.6 9.42 2 14.46 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.41-1.41A2 2 0 0 1 9.83 16h4.34a2 2 0 0 1 1.41.59L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.54-.6-6.58-.68-7.26A4 4 0 0 0 17.32 5z"/>'
+        gamepad: '<line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.59C2.6 9.42 2 14.46 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.41-1.41A2 2 0 0 1 9.83 16h4.34a2 2 0 0 1 1.41.59L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.54-.6-6.58-.68-7.26A4 4 0 0 0 17.32 5z"/>',
+        plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+        shuffle: '<polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/>',
+        share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>',
+        link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+        compare: '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>'
     };
     var _FILL = { github_fill: 1 };
     MM.icon = function (name, cls) {
@@ -104,7 +109,33 @@
     MM.likes  = function () { return MM.get('mm_likes', []); };
     MM.follows= function () { return MM.get('mm_follows', []); };
     MM.myMods = function () { return MM.get('mm_mymods', []); };
+    MM.recent = function () { return MM.get('mm_recent', []); };
     MM.qp     = function (name) { return new URLSearchParams(location.search).get(name) || ''; };
+
+    /* ---------------- Поделиться (копирование ссылки) ---------------- */
+    MM.shareMod = function () {
+        var url = location.href;
+        function copyFallback() {
+            var ta = document.createElement('textarea');
+            ta.value = url;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); MM.toast('Ссылка скопирована 🔗'); }
+            catch (e) { MM.toast('Не удалось скопировать ссылку', 'warn'); }
+            ta.remove();
+        }
+        if (navigator.share) {
+            navigator.share({ title: document.title, url: url }).catch(function () {});
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(function () {
+                MM.toast('Ссылка скопирована 🔗');
+            }, copyFallback);
+        } else {
+            copyFallback();
+        }
+    };
 
     MM.toast = function (msg, type) {
         var wrap = MM.$('#mmToasts');
@@ -427,12 +458,182 @@
         apply();
     }
 
+    /* ================= СРАВНЕНИЕ МОДОВ ================= */
+    function initCompare() {
+        var toggles = MM.$$('.cmp-toggle');
+        if (!toggles.length) return;
+        var bar = MM.$('#compareBar');
+        var modal = MM.$('#compareModal');
+        var table = MM.$('#compareTable');
+        var list = [];
+        var MAX = 3;
+
+        function paint() {
+            toggles.forEach(function (t) {
+                var id = t.getAttribute('data-cmp');
+                var on = list.indexOf(id) !== -1;
+                t.classList.toggle('active', on);
+                t.setAttribute('aria-pressed', on ? 'true' : 'false');
+                t.setAttribute('title', on ? 'Убрать из сравнения' : 'Добавить к сравнению');
+            });
+            var chips = MM.$('#compareChips');
+            if (chips) {
+                chips.innerHTML = list.map(function (id) {
+                    var m = MM.CATALOG.filter(function (x) { return x.id === id; })[0];
+                    return '<span class="compare-chip"><a href="mod.html?m=' + MM.esc(id) + '">' +
+                        MM.esc(m ? m.title : id) + '</a>' +
+                        '<button data-rm="' + MM.esc(id) + '" aria-label="Убрать">' + MM.icon('x') + '</button></span>';
+                }).join('');
+            }
+            var go = MM.$('#compareGo');
+            if (go) {
+                go.textContent = 'Сравнить' + (list.length ? ' (' + list.length + ')' : '');
+                go.disabled = list.length < 2;
+            }
+            if (bar) bar.classList.toggle('show', list.length > 0);
+        }
+
+        toggles.forEach(function (t) {
+            t.addEventListener('click', function () {
+                var id = t.getAttribute('data-cmp');
+                var i = list.indexOf(id);
+                if (i === -1) {
+                    if (list.length >= MAX) { MM.toast('Можно сравнить до ' + MAX + ' модов', 'warn'); return; }
+                    list.push(id);
+                } else {
+                    list.splice(i, 1);
+                }
+                paint();
+            });
+        });
+
+        if (bar) bar.addEventListener('click', function (e) {
+            var rm = e.target.closest('[data-rm]');
+            if (rm) {
+                var id = rm.getAttribute('data-rm');
+                var i = list.indexOf(id);
+                if (i !== -1) list.splice(i, 1);
+                paint();
+            }
+        });
+
+        var clear = MM.$('#compareClear');
+        if (clear) clear.addEventListener('click', function () { list = []; paint(); });
+
+        var go = MM.$('#compareGo');
+        if (go) go.addEventListener('click', function () {
+            if (list.length < 2) { MM.toast('Выбери хотя бы 2 мода', 'warn'); return; }
+            openModal(list);
+        });
+
+        function openModal(ids) {
+            if (!table) return;
+            var mods = ids.map(function (id) {
+                return MM.CATALOG.filter(function (x) { return x.id === id; })[0];
+            }).filter(Boolean);
+            if (!mods.length) return;
+            var ROWS = [
+                ['Категория', 'category'],
+                ['Версия Minecraft', 'mc'],
+                ['Версия мода', 'version'],
+                ['Автор', 'author'],
+                ['Скачивания', 'downloads', true],
+                ['Лайки', 'likes', true],
+                ['Просмотры', 'views', true],
+                ['Теги', 'tags'],
+                ['Описание', 'desc']
+            ];
+            var html = '<thead><tr><th class="cmp-attr-col"></th>' + mods.map(function (m) {
+                return '<th><a href="mod.html?m=' + MM.esc(m.id) + '">' + MM.esc(m.title) + '</a>' +
+                    '<span class="cmp-th-meta">' + MM.esc(m.author) + '</span></th>';
+            }).join('') + '</tr></thead><tbody>';
+            ROWS.forEach(function (r) {
+                var key = r[1], numeric = r[2];
+                var best = -1;
+                if (numeric) {
+                    mods.forEach(function (m) { best = Math.max(best, Number(m[key]) || 0); });
+                }
+                html += '<tr><th>' + MM.esc(r[0]) + '</th>' + mods.map(function (m) {
+                    var v = m[key];
+                    var cell;
+                    if (numeric) {
+                        cell = MM.fmt(v);
+                        var cls = (Number(v) === best && best > 0) ? ' cmp-best' : '';
+                    } else if (Array.isArray(v)) {
+                        cell = v.map(function (t) { return '#' + MM.esc(t); }).join(' ');
+                    } else {
+                        cell = MM.esc(v);
+                    }
+                    return '<td class="' + (numeric && Number(v) === best && best > 0 ? 'cmp-best' : '') + '">' + cell + '</td>';
+                }).join('') + '</tr>';
+            });
+            html += '</tbody>';
+            table.innerHTML = html;
+            if (modal) { modal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+        }
+
+        MM.closeCompare = function () {
+            if (modal) { modal.classList.remove('active'); document.body.style.overflow = ''; }
+        };
+        if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) MM.closeCompare(); });
+
+        paint();
+    }
+
+    /* ================= НЕДАВНО ПРОСМОТРЕННЫЕ ================= */
+    function initRecent() {
+        var section = MM.$('#recentSection');
+        var grid = MM.$('#recentGrid');
+        if (!grid) return;
+        var recent = MM.recent();
+        var mods = recent.map(function (id) {
+            return MM.CATALOG.filter(function (m) { return m.id === id; })[0];
+        }).filter(Boolean);
+        if (!mods.length) {
+            if (section) section.style.display = 'none';
+            return;
+        }
+        if (section) section.style.display = '';
+        grid.innerHTML = mods.map(function (m) {
+            return '<a class="recent-card" href="mod.html?m=' + MM.esc(m.id) + '">' +
+                '<div class="mod-category">' + MM.esc(m.category) + '</div>' +
+                '<h3>' + MM.esc(m.title) + '</h3>' +
+                '<span class="recent-meta">MC ' + MM.esc(m.mc) + ' · ' + MM.icon('download', 'ic-sm') + ' ' + MM.fmt(m.downloads) + '</span>' +
+            '</a>';
+        }).join('');
+    }
+
+    /* ================= СЛУЧАЙНЫЙ МОД ================= */
+    function initRandom() {
+        var btn = MM.$('#randomBtn');
+        if (!btn) return;
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            var m = MM.CATALOG[Math.floor(Math.random() * MM.CATALOG.length)];
+            if (!m) return;
+            MM.toast('🎲 Открываем «' + m.title + '»');
+            setTimeout(function () { location.href = 'mod.html?m=' + encodeURIComponent(m.id); }, 400);
+        });
+    }
+
     /* ================= СТРАНИЦА МОДА ================= */
     function initModPage() {
         var likeBtn = MM.$('#likeBtn');
         var modId = MM.qp('m') || document.body.getAttribute('data-mod') || 'technova';
         var mod = MM.CATALOG.filter(function (m) { return m.id === modId; })[0] || MM.CATALOG[1];
         var baseLikes = mod.likes;
+
+        // Запись в «недавно просмотренные»
+        var recent = MM.recent();
+        var ri = recent.indexOf(modId);
+        if (ri !== -1) recent.splice(ri, 1);
+        recent.unshift(modId);
+        if (recent.length > 6) recent.length = 6;
+        MM.set('mm_recent', recent);
+
+        // Кнопка «Поделиться»
+        var shareBtn = MM.$('#shareBtn');
+        if (shareBtn) shareBtn.addEventListener('click', function () { MM.shareMod(); });
 
         function paintLike() {
             if (!likeBtn) return;
@@ -1351,7 +1552,7 @@
         initAuthForms();
 
         switch (document.body.getAttribute('data-page')) {
-            case 'index':         initIndex(); break;
+            case 'index':         initIndex(); initCompare(); initRecent(); initRandom(); break;
             case 'mod':           initModPage(); break;
             case 'upload':        initUpload(); break;
             case 'profile':       initProfile(); break;

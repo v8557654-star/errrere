@@ -563,3 +563,261 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
 .n-sub { color: #facc15; }
 .n-new { color: var(--accent); }
 .n-msg { color: #c084fc; }
+
+/* ============================================================
+ * Новые фичи: сравнение модов, недавно просмотренные, поделиться
+ * ============================================================ */
+
+/* Кнопка-переключатель сравнения на карточке мода */
+.mod-card-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.cmp-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-main);
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s;
+    flex: 0 0 auto;
+}
+.cmp-toggle .ic { width: 14px; height: 14px; }
+.cmp-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.cmp-toggle.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0f1626;
+    transform: rotate(45deg);
+}
+
+/* Панель сравнения (внизу экрана) */
+.compare-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9000;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+    padding: 12px 20px;
+    transform: translateY(110%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.compare-bar.show { transform: translateY(0); }
+.compare-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+}
+.compare-bar-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+.compare-bar-label .ic { width: 18px; height: 18px; }
+.compare-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+}
+.compare-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 6px 4px 12px;
+    font-size: 13px;
+}
+.compare-chip a {
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 600;
+}
+.compare-chip a:hover { color: var(--accent); }
+.compare-chip button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+}
+.compare-chip button .ic { width: 14px; height: 14px; }
+.compare-chip button:hover { background: rgba(255, 77, 109, 0.15); color: #ff4d6d; }
+.compare-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.compare-clear {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.compare-clear:hover { border-color: #ff4d6d; color: #ff4d6d; }
+
+/* Модальное окно сравнения */
+.compare-modal-content {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 860px;
+    width: 94%;
+    max-height: 86vh;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.compare-table-wrap {
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+.compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 480px;
+}
+.compare-table th, .compare-table td {
+    padding: 11px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+}
+.compare-table thead th {
+    background: var(--bg-main);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.compare-table thead th a {
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: 15px;
+}
+.compare-table thead th a:hover { color: var(--accent); }
+.cmp-th-meta {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+.compare-table tbody th {
+    color: var(--text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+    width: 160px;
+}
+.compare-table tbody tr:last-child th,
+.compare-table tbody tr:last-child td { border-bottom: none; }
+.compare-table tbody td { color: var(--text-main); }
+.compare-table td.cmp-best {
+    color: var(--accent);
+    font-weight: 700;
+    background: rgba(34, 255, 136, 0.08);
+}
+
+/* Недавно просмотренные */
+.recent-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+.recent-card {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 18px;
+    text-decoration: none;
+    transition: all 0.25s;
+}
+.recent-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-lg), 0 0 18px rgba(34, 255, 136, 0.12);
+}
+.recent-card h3 {
+    margin: 10px 0 8px;
+    color: var(--text-main);
+    font-size: 16px;
+}
+.recent-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+.recent-meta .ic { width: 14px; height: 14px; }
+
+/* Кнопка «Поделиться» */
+.btn-share {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-share .ic { width: 18px; height: 18px; }
+.btn-share:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Кнопка «Сравнить» на панели: сброс браузерных стилей кнопки и disabled */
+.compare-bar .btn-download {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 18px;
+}
+.compare-bar .btn-download:disabled {
+    background: var(--bg-main);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+.compare-bar .btn-download:disabled::before { display: none; }
