@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="green" data-animations="on">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MineMods — лучшая платформа для поиска и загрузки модов для Minecraft">
+    <meta name="theme-color" content="#22ff88">
+    <title>MineMods — Моды для Minecraft</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⛏%3C/text%3E%3C/svg%3E">
+    <script>(function(){function g(k,d){try{var v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return d;}}
+    var h=document.documentElement;h.setAttribute('data-theme',g('mm_theme','green'));
+    h.setAttribute('data-animations',g('mm_animations','on')==='off'?'off':'on');})();</script>
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/static-site.css">
+    <link rel="preconnect" href="https://api.modrinth.com">
+    <link rel="preconnect" href="https://api.github.com">
+</head>
+<body data-page="index">
+<a href="#main-content" class="skip-link">Перейти к основному контенту</a>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">⛏</span>
+                <span class="logo-text">MineMods</span>
+            </a>
+        </div>
+        <nav class="sidebar-nav" role="navigation" aria-label="Боковая навигация">
+            <a href="index.html" class="nav-item active"><span class="nav-icon" aria-hidden="true">🏠</span><span>Каталог</span></a>
+            <a href="news.html" class="nav-item"><span class="nav-icon" aria-hidden="true">📰</span><span>Новости</span></a>
+            <a href="modrinth.html" class="nav-item"><span class="nav-icon" aria-hidden="true">🌍</span><span>Modrinth</span></a>
+            <a href="github.html" class="nav-item"><span class="nav-icon" aria-hidden="true">🦊</span><span>GitHub</span></a>
+            <a href="feed.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">📡</span><span>Подписки</span></a>
+            <a href="favorites.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">❤️</span><span>Избранное</span></a>
+            <a href="upload.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">📤</span><span>Загрузить</span></a>
+            <a href="achievements.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">🏅</span><span>Достижения</span></a>
+        </nav>
+        <div class="sidebar-footer" id="sidebarAuth"></div>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        <header class="topbar" role="banner">
+            <button class="mobile-menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Меню">☰</button>
+            <div class="topbar-right" id="topbarRight" role="navigation" aria-label="Основная навигация"></div>
+        </header>
+
+        <div class="container">
+            <div id="pageContent">
+
+<!-- Hero -->
+<section class="hero-section mb-16 animate-fade-in">
+    <h1 class="hero-title">Лучшие моды для Minecraft</h1>
+    <p class="hero-subtitle">
+        Откройте для себя тысячи модов, улучшающих ваш игровой опыт.
+        От технологических чудес до магических приключений.
+    </p>
+    <div class="hero-actions">
+        <a href="#mods" class="btn-hero btn-hero-primary">Смотреть моды</a>
+        <a href="#about" class="btn-hero btn-hero-ghost">О проекте</a>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-num counter cnt-blue" data-target="9">0</div>
+            <div class="stat-label">Модов</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num counter cnt-purple" data-target="50000">0</div>
+            <div class="stat-label">Скачиваний</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num counter cnt-green" data-target="1200">0</div>
+            <div class="stat-label">Пользователей</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num counter cnt-yellow" data-target="98">0</div>
+            <div class="stat-label">% Положительных</div>
+        </div>
+    </div>
+</section>
+
+<div class="news-banner animate-fade-in-up">
+    <h3>📰 Последние новости</h3>
+    <div class="news-strip">
+        <a href="news.html" class="news-pill"><strong>✨ MineMods 2.0 уже здесь</strong><span>15.08</span></a>
+        <a href="news.html" class="news-pill"><strong>🏆 Конкурс модов — август</strong><span>08.08</span></a>
+        <a href="news.html" class="news-pill"><strong>🚀 Новый раздел шейдеров</strong><span>01.08</span></a>
+        <a href="news.html" class="news-all">Все →</a>
+    </div>
+</div>
+
+<div class="top-section animate-fade-in-up">
+    <h2 class="section-title">🏆 Топ модов</h2>
+    <div class="top-grid">
+        <a href="mod.html?m=dragon-mounts-2" class="top-card top-1">
+            <div class="top-rank">#1</div>
+            <div class="top-info">
+                <div class="mod-category">Мобы</div>
+                <h3>Dragon Mounts II</h3>
+                <div class="top-stats">
+                    <span>⬇ 15230</span>
+                    <span>❤ 1210</span>
+                    <span>👁 55800</span>
+                </div>
+            </div>
+        </a>
+        <a href="mod.html?m=technova" class="top-card top-2">
+            <div class="top-rank">#2</div>
+            <div class="top-info">
+                <div class="mod-category">Техника</div>
+                <h3>TechNova</h3>
+                <div class="top-stats">
+                    <span>⬇ 12840</span>
+                    <span>❤ 932</span>
+                    <span>👁 40210</span>
+                </div>
+            </div>
+        </a>
+        <a href="mod.html?m=utility-belt" class="top-card top-3">
+            <div class="top-rank">#3</div>
+            <div class="top-info">
+                <div class="mod-category">Утилиты</div>
+                <h3>Utility Belt</h3>
+                <div class="top-stats">
+                    <span>⬇ 11210</span>
+                    <span>❤ 980</span>
+                    <span>👁 33400</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Поиск и фильтры -->
+<section class="mb-12 animate-fade-in-up">
+    <div class="search-bar">
+        <form id="modFilterForm" method="GET" action="#mods">
+            <div class="search-input-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="fq" name="q" placeholder="Поиск по названию, описанию, тегам..." autocomplete="off">
+            </div>
+            <select id="fcat" name="category">
+                <option value="">Все категории</option>
+                <option value="Магия">Магия</option>
+                <option value="Техника">Техника</option>
+                <option value="Оружие">Оружие</option>
+                <option value="Мобы">Мобы</option>
+                <option value="Декор">Декор</option>
+                <option value="Еда">Еда</option>
+                <option value="Миры">Миры</option>
+                <option value="Утилиты">Утилиты</option>
+                <option value="Другое">Другое</option>
+            </select>
+            <select id="fver" name="mc_version">
+                <option value="">Все версии</option>
+                <option value="1.21.4">1.21.4</option>
+                <option value="1.21.3">1.21.3</option>
+                <option value="1.21.1">1.21.1</option>
+                <option value="1.21">1.21</option>
+                <option value="1.20.6">1.20.6</option>
+                <option value="1.20.4">1.20.4</option>
+                <option value="1.20.2">1.20.2</option>
+                <option value="1.20.1">1.20.1</option>
+                <option value="1.19.4">1.19.4</option>
+                <option value="1.19.2">1.19.2</option>
+                <option value="1.18.2">1.18.2</option>
+                <option value="1.17.1">1.17.1</option>
+                <option value="1.16.5">1.16.5</option>
+                <option value="1.12.2">1.12.2</option>
+                <option value="1.8.9">1.8.9</option>
+                <option value="1.7.10">1.7.10</option>
+            </select>
+            <button type="submit">Найти</button>
+        </form>
+        <div class="tags-filter">
+            <button class="tag-btn active" data-tag="all">Все</button>
+            <button class="tag-btn" data-tag="техника">Техника</button>
+            <button class="tag-btn" data-tag="магия">Магия</button>
+            <button class="tag-btn" data-tag="приключения">Приключения</button>
+            <button class="tag-btn" data-tag="мобы">Мобы</button>
+            <button class="tag-btn" data-tag="декор">Декор</button>
+            <button class="tag-btn" data-tag="еда">Еда</button>
+        </div>
+    </div>
+</section>
+
+<!-- Сортировка -->
+<div class="sort-tabs mb-12 animate-fade-in-up">
+    <button class="sort-tab active" data-sort="new">🆕 Новые</button>
+    <button class="sort-tab" data-sort="popular">🔥 Популярные</button>
+    <button class="sort-tab" data-sort="top">⭐ Лучшие</button>
+    <button class="sort-tab" data-sort="views">👁 Просмотры</button>
+</div>
+
+<!-- Каталог -->
+<section id="mods" class="mb-16">
+    <h2 class="section-heading">Каталог модов</h2>
+    <div class="mods-grid" id="modsGrid">
+        <div class="mod-card" data-title="Dragon Mounts II" data-desc="Выращивайте, приручайте и оседлайте девять видов драконов с уникальными способностями и окрасками." data-category="Мобы"
+             data-mc="1.20.4" data-tags="драконы маунты мобы" data-downloads="15230" data-likes="1210"
+             data-views="55800" data-date="20260728">
+            <div class="mod-card-header">
+                <div class="mod-category">Мобы</div>
+                <div class="mod-mc-badge">MC 1.20.4</div>
+            </div>
+            <h3><a href="mod.html?m=dragon-mounts-2">Dragon Mounts II</a></h3>
+            <p class="mod-meta"><span>v1.6.3</span> <span>•</span> <span>👤 <a href="user.html?u=SteveCraft" class="author-link">SteveCraft</a></span></p>
+            <p class="mod-desc">Выращивайте, приручайте и оседлайте девять видов драконов с уникальными способностями и окрасками.</p>
+            <div class="mod-tags"><span class="tag">#драконы</span><span class="tag">#маунты</span><span class="tag">#мобы</span></div>
+            <div class="mod-footer">
+                <div class="mod-stats">
+                    <span class="stat-item">⬇ 15230</span>
+                    <span class="stat-item">❤ 1210</span>
+                    <span class="stat-item">👁 55800</span>
+                </div>
+                <a href="mod.html?m=dragon-mounts-2#download" class="btn-download">Скачать</a>
+            </div>
+        </div>
+        <div class="mod-card" data-title="TechNova" data-desc="Продвинутая автоматизация: конвейеры, дробилки, энергосети и умные механизмы для больших фабрик." data-category="Техника"
+             data-mc="1.20.1" data-tags="техника автоматизация энергия" data-downloads="12840" data-likes="932"
+             data-views="40210" data-date="20260812">
+            <div class="mod-card-header">
+                <div class="mod-category">Техника</div>
+                <div class="mod-mc-badge">MC 1.20.1</div>
+            </div>
+            <h3><a href="mod.html?m=technova">TechNova</a></h3>
+            <p class="mod-meta"><span>v3.2.0</span> <span>•</span> <span>👤 <a href="user.html?u=TechWizard" class="author-link">TechWizard</a></span></p>
+            <p class="mod-desc">Продвинутая автоматизация: конвейеры, дробилки, энергосети и умные механизмы для больших фабрик.</p>
+            <div class="mod-tags"><span class="tag">#техника</span><span class="tag">#автоматизация</span><span class="tag">#энергия</span></div>
+            <div class="mod-footer">
+                <div class="mod-stats">
+                    <span class="stat-item">⬇ 12840</span>
+                    <span class="stat-item">❤ 932</span>
+                    <span class="stat-item">👁 40210</span>
+                </div>
+                <a href="mod.html?m=technova#download" class="btn-download">Скачать</a>
+            </div>
+        </div>
+        <div class="mod-card" data-title="Utility Belt" data-desc="Пояс с быстрым доступом к инструментам, расширенный HUD и умные горячие клавиши." data-category="Утилиты"
+             data-mc="1.20.6" data-tags="утилиты инструменты hud" data-downloads="11210" data-likes="980"
+             data-views="33400" data-date="20260802">
+            <div class="mod-card-header">
+                <div class="mod-category">Утилиты</div>
+                <div class="mod-mc-badge">MC 1.20.6</div>
+            </div>
+            <h3><a href="mod.html?m=utility-belt">Utility Belt</a></h3>
+            <p class="mod-meta"><span>v3.0.5</span> <span>•</span> <span>👤 <a href="user.html?u=TechWizard" class="author-link">TechWizard</a></span></p>
+            <p class="mod-desc">Пояс с быстрым доступом к инструментам, расширенный HUD и умные горячие клавиши.</p>
+            <div class="mod-tags"><span class="tag">#утилиты</span><span class="tag">#инструменты</span><span class="tag">#hud</span></div>
+            <div class="mod-footer">
+                <div class="mod-stats">
+                    <span class="stat-item">⬇ 11210</span>
+                    <span class="stat-item">❤ 980</span>
+                    <span class="stat-item">👁 33400</span>
+                </div>
+                <a href="mod.html?m=utility-belt#download" class="btn-download">Скачать</a>
+            </div>
+        </div>
+        <div class="mod-card" data-title="Arcane Realms" data-desc="Система заклинаний, ритуалы, магические артефакты и древние подземелья с боссами." data-category="Магия"
+             data-mc="1.21.1" data-tags="магия ритуалы rpg" data-downloads="9560" data-likes="812"
+             data-views="31200" data-date="20260805">
+            <div class="mod-card-header">
+                <div class="mod-category">Магия</div>
+                <div class="mod-mc-badge">MC 1.21.1</div>
+            </div>
+            <h3><a href="mod.html?m=arcane-realms">Arcane Realms</a></h3>
+            <p class="mod-meta"><span>v2.0.1</span> <span>•</span> <span>👤 <a href="user.html?u=MageCraft" class="author-link">MageCraft</a></span></p>
+            <p class="mod-desc">Система заклинаний, ритуалы, магические артефакты и древние подземелья с боссами.</p>
+            <div class="mod-tags"><span class="tag">#магия</span><span class="tag">#ритуалы</span><span class="tag">#rpg</span></div>
+            <div class="mod-footer">
+                <div class="mod-stats">
+                    <span class="stat-item">⬇ 9560</span>
+                    <span class="stat-item">❤ 812</span>
+                    <span class="stat-item">👁 31200</span>
+                </div>
+                <a href="mod.html?m=arcane-realms#download" class="btn-download">Скачать</a>
+            </div>
+        </div>
+        <div class="mod-card" data-title="DecoPlus" data-desc="Сотни блоков мебели и декора: стулья, лампы, полки и анимированные украшения." data-category="Декор"
+             data-mc="1.21" data-tags="декор мебель строительство" data-downloads="8920" data-likes="745"
+             data-views="26400" data-date="20260810">
+            <div class="mod-card-header">
+                <div class="mod-category">Декор</div>
+                <div class="mod-mc-badge">MC 1.21</div>
+            </div>
+            <h3><a href="mod.html?m=deco-plus">DecoPlus</a></h3>
+            <p class="mod-meta"><span>v4.1.2</span> <span>•</span> <span>👤 <a href="user.html?u=AlexBuilds" class="author-link">AlexBuilds</a></span></p>
+            <p class="mod-desc">Сотни блоков мебели и декора: стулья, лампы, полки и анимированные украшения.</p>
+            <div class="mod-tags"><span class="tag">#декор</span><span class="tag">#мебель</span><span class="tag">#строительство</span></div>
+            <div class="mod-footer">
+                <div class="mod-stats">
+                    <span class="stat-item">⬇ 8920</span>
+                    <span class="stat-item">❤ 745</span>
+                    <span class="stat-item">👁 26400</span>
+                </div>
+                <a href="mod.html?m=deco-plus#download" class="btn-download">Скачать</a>
+            </div>
+        </div>
+        <div class="mod-card" data-title="Sky Village" data-desc="Парящие в небе деревни с торговцами, воздушными кораблями и редкой добычей." data-category="Миры"
+             data-mc="1.21.4" data-tags="деревни структуры генерация" data-downloads="7650" data-likes="620"
+             data-views="21900" data-date="20260815">
+            <div class="mod-card-header">
+                <div class="mod-category">Миры</div>
+                <div class="mod-mc-badge">MC 1.21.4</div>
+            </div>
+            <h3><a href="mod.html?m=sky-village">Sky Village</a></h3>
+            <p class="mod-meta"><span>v2.2.0</span> <span>•</span> <span>👤 <a href="user.html?u=SteveCraft" class="author-link">SteveCraft</a></span></p>
+            <p class="mod-desc">Парящие в небе деревни с торговцами, воздушными кораблями и редкой добычей.</p>
+            <div class="mod-tags"><span class="tag">#деревни</span><span class="tag">#структуры</span><span class="tag">#генерация</span></div>
+            <div class="mod-footer">
+                <div class="mod-stats">
+                    <span class="stat-item">⬇ 7650</span>
+                    <span class="stat-item">❤ 620</span>
+                    <span class="stat-item">👁 21900</span>
+                </div>
+                <a href="mod.html?m=sky-village#download" class="btn-download">Скачать</a>
+            </div>
+        </div>
+        <div class="mod-card" data-title="FeastCraft" data-desc="Более 120 новых блюд, кухонная утварь, фермерские культуры и система голода с бонусами." data-category="Еда"
+             data-mc="1.20.1" data-tags="еда фермерство кулинария" data-downloads="6840" data-likes="512"
+             data-views="19800" data-date="20260720">
+            <div class="mod-card-header">
+                <div class="mod-category">Еда</div>
+                <div class="mod-mc-badge">MC 1.20.1</div>
+            </div>
+            <h3><a href="mod.html?m=feastcraft">FeastCraft</a></h3>
+            <p class="mod-meta"><span>v2.4.0</span> <span>•</span> <span>👤 <a href="user.html?u=AlexBuilds" class="author-link">AlexBuilds</a></span></p>
+            <p class="mod-desc">Более 120 новых блюд, кухонная утварь, фермерские культуры и система голода с бонусами.</p>
+            <div class="mod-tags"><span class="tag">#еда</span><span class="tag">#фермерство</span><span class="tag">#кулинария</span></div>
+            <div class="mod-footer">
+                <div class="mod-stats">
+                    <span class="stat-item">⬇ 6840</span>
+                    <span class="stat-item">❤ 512</span>
+                    <span class="stat-item">👁 19800</span>
+                </div>
+                <a href="mod.html?m=feastcraft#download" class="btn-download">Скачать</a>
+            </div>
+        </div>
+        <div class="mod-card" data-title="Void Dimensions" data-desc="Четыре новых измерения с уникальными биомами, структурами и боссами." data-category="Миры"
+             data-mc="1.19.2" data-tags="измерения миры приключения" data-downloads="5430" data-likes="498"
+             data-views="15700" data-date="20260630">
+            <div class="mod-card-header">
+                <div class="mod-category">Миры</div>
+                <div class="mod-mc-badge">MC 1.19.2</div>
+            </div>
+            <h3><a href="mod.html?m=void-dimensions">Void Dimensions</a></h3>
+            <p class="mod-meta"><span>v1.3.0</span> <span>•</span> <span>👤 <a href="user.html?u=VoidWalker" class="author-link">VoidWalker</a></span></p>
+            <p class="mod-desc">Четыре новых измерения с уникальными биомами, структурами и боссами.</p>
+            <div class="mod-tags"><span class="tag">#измерения</span><span class="tag">#миры</span><span class="tag">#приключения</span></div>
+            <div class="mod-footer">
+                <div class="mod-stats">
+                    <span class="stat-item">⬇ 5430</span>
+                    <span class="stat-item">❤ 498</span>
+                    <span class="stat-item">👁 15700</span>
+                </div>
+                <a href="mod.html?m=void-dimensions#download" class="btn-download">Скачать</a>
+            </div>
+        </div>
+        <div class="mod-card" data-title="Royal Armory" data-desc="60+ видов средневекового оружия и брони с уникальными свойствами и прокачкой." data-category="Оружие"
+             data-mc="1.18.2" data-tags="оружие броня бой" data-downloads="4210" data-likes="365"
+             data-views="12100" data-date="20260518">
+            <div class="mod-card-header">
+                <div class="mod-category">Оружие</div>
+                <div class="mod-mc-badge">MC 1.18.2</div>
+            </div>
+            <h3><a href="mod.html?m=royal-armory">Royal Armory</a></h3>
+            <p class="mod-meta"><span>v1.9.1</span> <span>•</span> <span>👤 <a href="user.html?u=RoyalSmith" class="author-link">RoyalSmith</a></span></p>
+            <p class="mod-desc">60+ видов средневекового оружия и брони с уникальными свойствами и прокачкой.</p>
+            <div class="mod-tags"><span class="tag">#оружие</span><span class="tag">#броня</span><span class="tag">#бой</span></div>
+            <div class="mod-footer">
+                <div class="mod-stats">
+                    <span class="stat-item">⬇ 4210</span>
+                    <span class="stat-item">❤ 365</span>
+                    <span class="stat-item">👁 12100</span>
+                </div>
+                <a href="mod.html?m=royal-armory#download" class="btn-download">Скачать</a>
+            </div>
+        </div>
+        <div class="empty-state" id="noResults" style="display:none;grid-column:1/-1">
+            <div class="empty-icon">📦</div>
+            <h3>Ничего не найдено</h3>
+        </div>
+    </div>
+</section>
+
+<!-- О проекте -->
+<section id="about" class="mb-16 animate-fade-in-up">
+    <div class="about-card">
+        <h2 class="section-heading">О проекте</h2>
+        <p>
+            Наш сайт предоставляет удобный каталог модов для Minecraft с поддержкой различных версий игры и загрузчиков.
+            Мы стремимся сделать процесс поиска и установки модов максимально простым и приятным.
+        </p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Быстрая загрузка</h3>
+                <p>Оптимизированная система доставки файлов обеспечивает максимальную скорость скачивания.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3>Проверенные моды</h3>
+                <p>Все моды проходят проверку на безопасность и совместимость перед публикацией.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="mb-16 animate-fade-in-up">
+    <h2 class="section-heading">Частые вопросы</h2>
+    <div class="faq-list">
+        <details class="faq-item">
+            <summary><span>Как установить мод?</span><span class="faq-arrow">▼</span></summary>
+            <div class="faq-body">
+                <ol>
+                    <li>Выберите нужную версию Minecraft и загрузчик (Forge/Fabric)</li>
+                    <li>Скачайте файл мода</li>
+                    <li>Поместите файл в папку <code>mods</code> в директории игры</li>
+                    <li>Запустите Minecraft с выбранным загрузчиком</li>
+                </ol>
+            </div>
+        </details>
+        <details class="faq-item">
+            <summary><span>Какие версии Minecraft поддерживаются?</span><span class="faq-arrow">▼</span></summary>
+            <div class="faq-body">
+                Мы поддерживаем версии от 1.16.5 до последних релизов 1.21+. Каждый мод указывает совместимые версии в описании.
+            </div>
+        </details>
+        <details class="faq-item">
+            <summary><span>Безопасно ли скачивать моды здесь?</span><span class="faq-arrow">▼</span></summary>
+            <div class="faq-body">
+                Да, все моды проходят проверку на вирусы и вредоносное ПО. Мы размещаем файлы только из проверенных источников.
+            </div>
+        </details>
+    </div>
+</section>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+document.addEventListener('click', function(e) {
+    var sidebar = document.querySelector('.sidebar');
+    var toggle = document.querySelector('.mobile-menu-toggle');
+    if (window.innerWidth <= 900 && sidebar.classList.contains('open')
+        && !sidebar.contains(e.target) && e.target !== toggle) {
+        sidebar.classList.remove('open');
+    }
+    var dropdown = document.querySelector('.user-dropdown');
+    var menuBtn = document.querySelector('.user-menu-btn');
+    if (dropdown && dropdown.classList.contains('open') && menuBtn
+        && !dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+        dropdown.classList.remove('open');
+    }
+});
+</script>
+<script src="static/js/main.js"></script>
+<script src="static/js/site.js"></script>
+
+</body>
+</html>

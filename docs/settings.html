@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="green" data-animations="on">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MineMods — лучшая платформа для поиска и загрузки модов для Minecraft">
+    <meta name="theme-color" content="#22ff88">
+    <title>Настройки — MineMods</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⛏%3C/text%3E%3C/svg%3E">
+    <script>(function(){function g(k,d){try{var v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return d;}}
+    var h=document.documentElement;h.setAttribute('data-theme',g('mm_theme','green'));
+    h.setAttribute('data-animations',g('mm_animations','on')==='off'?'off':'on');})();</script>
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/static-site.css">
+    <link rel="preconnect" href="https://api.modrinth.com">
+    <link rel="preconnect" href="https://api.github.com">
+</head>
+<body data-page="settings" data-protected="1">
+<a href="#main-content" class="skip-link">Перейти к основному контенту</a>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">⛏</span>
+                <span class="logo-text">MineMods</span>
+            </a>
+        </div>
+        <nav class="sidebar-nav" role="navigation" aria-label="Боковая навигация">
+            <a href="index.html" class="nav-item"><span class="nav-icon" aria-hidden="true">🏠</span><span>Каталог</span></a>
+            <a href="news.html" class="nav-item"><span class="nav-icon" aria-hidden="true">📰</span><span>Новости</span></a>
+            <a href="modrinth.html" class="nav-item"><span class="nav-icon" aria-hidden="true">🌍</span><span>Modrinth</span></a>
+            <a href="github.html" class="nav-item"><span class="nav-icon" aria-hidden="true">🦊</span><span>GitHub</span></a>
+            <a href="feed.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">📡</span><span>Подписки</span></a>
+            <a href="favorites.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">❤️</span><span>Избранное</span></a>
+            <a href="upload.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">📤</span><span>Загрузить</span></a>
+            <a href="achievements.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">🏅</span><span>Достижения</span></a>
+        </nav>
+        <div class="sidebar-footer" id="sidebarAuth"></div>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        <header class="topbar" role="banner">
+            <button class="mobile-menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Меню">☰</button>
+            <div class="topbar-right" id="topbarRight" role="navigation" aria-label="Основная навигация"></div>
+        </header>
+
+        <div class="container">
+            <div id="pageContent">
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">⚙️ Настройки</h1>
+        <p class="page-subtitle">Настрой сайт под себя — всё сохраняется в браузере</p>
+    </div>
+</div>
+
+<div class="settings-grid">
+
+    <div class="settings-card">
+        <h3>🖼️ Аватарка</h3>
+        <p class="settings-desc">Загрузи свою аватарку (jpg, png, gif) — хранится локально</p>
+        <div class="avatar-upload">
+            <div class="current-avatar-letter">👤</div>
+            <label class="file-label-small">
+                📁 Выбрать файл
+                <input type="file" id="avatarInput" accept="image/*">
+            </label>
+        </div>
+    </div>
+
+    <div class="settings-card">
+        <h3>🎨 Тема оформления</h3>
+        <p class="settings-desc">Применяется мгновенно и запоминается</p>
+        <div class="theme-grid" id="themeGrid">
+                <label class="theme-option theme-green">
+                    <input type="radio" name="theme" value="green">
+                    <div class="theme-preview"><div class="tp-bar"></div><div class="tp-content"></div></div>
+                    <div class="theme-name">Зелёный</div>
+                </label>
+                <label class="theme-option theme-blue">
+                    <input type="radio" name="theme" value="blue">
+                    <div class="theme-preview"><div class="tp-bar"></div><div class="tp-content"></div></div>
+                    <div class="theme-name">Синий</div>
+                </label>
+                <label class="theme-option theme-purple">
+                    <input type="radio" name="theme" value="purple">
+                    <div class="theme-preview"><div class="tp-bar"></div><div class="tp-content"></div></div>
+                    <div class="theme-name">Фиолетовый</div>
+                </label>
+                <label class="theme-option theme-orange">
+                    <input type="radio" name="theme" value="orange">
+                    <div class="theme-preview"><div class="tp-bar"></div><div class="tp-content"></div></div>
+                    <div class="theme-name">Оранжевый</div>
+                </label>
+                <label class="theme-option theme-pink">
+                    <input type="radio" name="theme" value="pink">
+                    <div class="theme-preview"><div class="tp-bar"></div><div class="tp-content"></div></div>
+                    <div class="theme-name">Розовый</div>
+                </label>
+                <label class="theme-option theme-light">
+                    <input type="radio" name="theme" value="light">
+                    <div class="theme-preview"><div class="tp-bar"></div><div class="tp-content"></div></div>
+                    <div class="theme-name">Светлая</div>
+                </label>
+                <label class="theme-option theme-amoled">
+                    <input type="radio" name="theme" value="amoled">
+                    <div class="theme-preview"><div class="tp-bar"></div><div class="tp-content"></div></div>
+                    <div class="theme-name">AMOLED 🖤</div>
+                </label>
+        </div>
+    </div>
+
+    <div class="settings-card">
+        <h3>✨ Анимации</h3>
+        <p class="settings-desc">Включи или выключи анимации интерфейса</p>
+        <label class="switch-row">
+            <span>Анимации интерфейса</span>
+            <label class="switch">
+                <input type="checkbox" id="animToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </label>
+    </div>
+
+    <div class="settings-card">
+        <h3>👤 Профиль</h3>
+        <p class="settings-desc">Информация о тебе</p>
+        <form id="profileForm">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="email@example.com">
+            <label>О себе</label>
+            <textarea name="bio" rows="3" maxlength="300" placeholder="Расскажи о себе..."></textarea>
+            <button type="submit" class="btn-save">Сохранить профиль</button>
+        </form>
+    </div>
+
+    <div class="settings-card">
+        <h3>🔒 Пароль</h3>
+        <p class="settings-desc">Смени пароль для безопасности</p>
+        <form id="passwordForm">
+            <label>Текущий пароль</label>
+            <input type="password" name="old_password" required>
+            <label>Новый пароль</label>
+            <input type="password" name="new_password" required minlength="6">
+            <button type="submit" class="btn-save">Изменить пароль</button>
+        </form>
+    </div>
+
+</div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+document.addEventListener('click', function(e) {
+    var sidebar = document.querySelector('.sidebar');
+    var toggle = document.querySelector('.mobile-menu-toggle');
+    if (window.innerWidth <= 900 && sidebar.classList.contains('open')
+        && !sidebar.contains(e.target) && e.target !== toggle) {
+        sidebar.classList.remove('open');
+    }
+    var dropdown = document.querySelector('.user-dropdown');
+    var menuBtn = document.querySelector('.user-menu-btn');
+    if (dropdown && dropdown.classList.contains('open') && menuBtn
+        && !dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+        dropdown.classList.remove('open');
+    }
+});
+</script>
+<script src="static/js/main.js"></script>
+<script src="static/js/site.js"></script>
+
+</body>
+</html>

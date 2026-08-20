@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="green" data-animations="on">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MineMods — лучшая платформа для поиска и загрузки модов для Minecraft">
+    <meta name="theme-color" content="#22ff88">
+    <title>Modrinth — MineMods</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⛏%3C/text%3E%3C/svg%3E">
+    <script>(function(){function g(k,d){try{var v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return d;}}
+    var h=document.documentElement;h.setAttribute('data-theme',g('mm_theme','green'));
+    h.setAttribute('data-animations',g('mm_animations','on')==='off'?'off':'on');})();</script>
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/static-site.css">
+    <link rel="preconnect" href="https://api.modrinth.com">
+    <link rel="preconnect" href="https://api.github.com">
+</head>
+<body data-page="modrinth">
+<a href="#main-content" class="skip-link">Перейти к основному контенту</a>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">⛏</span>
+                <span class="logo-text">MineMods</span>
+            </a>
+        </div>
+        <nav class="sidebar-nav" role="navigation" aria-label="Боковая навигация">
+            <a href="index.html" class="nav-item"><span class="nav-icon" aria-hidden="true">🏠</span><span>Каталог</span></a>
+            <a href="news.html" class="nav-item"><span class="nav-icon" aria-hidden="true">📰</span><span>Новости</span></a>
+            <a href="modrinth.html" class="nav-item active"><span class="nav-icon" aria-hidden="true">🌍</span><span>Modrinth</span></a>
+            <a href="github.html" class="nav-item"><span class="nav-icon" aria-hidden="true">🦊</span><span>GitHub</span></a>
+            <a href="feed.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">📡</span><span>Подписки</span></a>
+            <a href="favorites.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">❤️</span><span>Избранное</span></a>
+            <a href="upload.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">📤</span><span>Загрузить</span></a>
+            <a href="achievements.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">🏅</span><span>Достижения</span></a>
+        </nav>
+        <div class="sidebar-footer" id="sidebarAuth"></div>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        <header class="topbar" role="banner">
+            <button class="mobile-menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Меню">☰</button>
+            <div class="topbar-right" id="topbarRight" role="navigation" aria-label="Основная навигация"></div>
+        </header>
+
+        <div class="container">
+            <div id="pageContent">
+
+<div class="content-type-tabs mr-type-tabs">
+        <a href="#" class="ct-tab active" data-type="mod"><span class="ct-icon">⛏</span><span>Моды</span></a>
+        <a href="#" class="ct-tab" data-type="shader"><span class="ct-icon">🌅</span><span>Шейдеры</span></a>
+        <a href="#" class="ct-tab" data-type="plugin"><span class="ct-icon">🔌</span><span>Плагины</span></a>
+        <a href="#" class="ct-tab" data-type="resourcepack"><span class="ct-icon">🎨</span><span>Ресурспаки</span></a>
+        <a href="#" class="ct-tab" data-type="modpack"><span class="ct-icon">📦</span><span>Сборки</span></a>
+        <a href="#" class="ct-tab" data-type="datapack"><span class="ct-icon">📝</span><span>Датапаки</span></a>
+</div>
+
+<div class="modrinth-header">
+    <div class="modrinth-logo">
+        <div class="mr-logo-icon">🌍</div>
+        <div>
+            <h1>Modrinth</h1>
+            <p>Поиск по миллионам модов — данные загружаются напрямую с API Modrinth</p>
+        </div>
+    </div>
+    <div class="modrinth-stats" id="mrTotal">…</div>
+</div>
+
+<div class="search-bar">
+    <form id="mrForm" method="GET">
+        <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="mrQ" name="q" placeholder="Поиск модов на Modrinth..." autocomplete="off">
+        </div>
+        <select id="mrCat" name="category">
+            <option value="">Все категории</option>
+            <option value="optimization">Оптимизация</option>
+            <option value="adventure">Приключения</option>
+            <option value="cursed">Cursed</option>
+            <option value="decoration">Декор</option>
+            <option value="equipment">Снаряжение</option>
+            <option value="food">Еда</option>
+            <option value="library">Библиотека</option>
+            <option value="magic">Магия</option>
+            <option value="mobs">Мобы</option>
+            <option value="storage">Хранилища</option>
+            <option value="technology">Технологии</option>
+            <option value="utility">Утилиты</option>
+            <option value="worldgen">Генерация мира</option>
+        </select>
+        <select id="mrVer" name="mc_version">
+            <option value="">Все версии MC</option>
+            <option value="1.21.4">1.21.4</option>
+            <option value="1.21.3">1.21.3</option>
+            <option value="1.21.1">1.21.1</option>
+            <option value="1.21">1.21</option>
+            <option value="1.20.6">1.20.6</option>
+            <option value="1.20.4">1.20.4</option>
+            <option value="1.20.2">1.20.2</option>
+            <option value="1.20.1">1.20.1</option>
+            <option value="1.19.4">1.19.4</option>
+            <option value="1.19.2">1.19.2</option>
+        </select>
+        <button type="submit">Найти</button>
+    </form>
+</div>
+
+<div class="sort-tabs">
+    <button class="sort-tab active" data-sort="relevance">🎯 Релевантность</button>
+    <button class="sort-tab" data-sort="downloads">🔥 Скачивания</button>
+    <button class="sort-tab" data-sort="follow_count">⭐ Подписчики</button>
+    <button class="sort-tab" data-sort="newest">🆕 Новые</button>
+    <button class="sort-tab" data-sort="updated">🔄 Обновлённые</button>
+</div>
+
+<div class="modrinth-grid" id="mrResults"></div>
+<div class="pagination" id="mrPagination"></div>
+
+<div class="modrinth-credits">
+    Данные предоставлены <a href="https://modrinth.com" target="_blank" rel="noopener">Modrinth</a>
+</div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+document.addEventListener('click', function(e) {
+    var sidebar = document.querySelector('.sidebar');
+    var toggle = document.querySelector('.mobile-menu-toggle');
+    if (window.innerWidth <= 900 && sidebar.classList.contains('open')
+        && !sidebar.contains(e.target) && e.target !== toggle) {
+        sidebar.classList.remove('open');
+    }
+    var dropdown = document.querySelector('.user-dropdown');
+    var menuBtn = document.querySelector('.user-menu-btn');
+    if (dropdown && dropdown.classList.contains('open') && menuBtn
+        && !dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+        dropdown.classList.remove('open');
+    }
+});
+</script>
+<script src="static/js/main.js"></script>
+<script src="static/js/site.js"></script>
+
+</body>
+</html>

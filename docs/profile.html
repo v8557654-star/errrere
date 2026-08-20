@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="green" data-animations="on">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MineMods — лучшая платформа для поиска и загрузки модов для Minecraft">
+    <meta name="theme-color" content="#22ff88">
+    <title>Мой профиль — MineMods</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⛏%3C/text%3E%3C/svg%3E">
+    <script>(function(){function g(k,d){try{var v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return d;}}
+    var h=document.documentElement;h.setAttribute('data-theme',g('mm_theme','green'));
+    h.setAttribute('data-animations',g('mm_animations','on')==='off'?'off':'on');})();</script>
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/static-site.css">
+    <link rel="preconnect" href="https://api.modrinth.com">
+    <link rel="preconnect" href="https://api.github.com">
+</head>
+<body data-page="profile" data-protected="1">
+<a href="#main-content" class="skip-link">Перейти к основному контенту</a>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">⛏</span>
+                <span class="logo-text">MineMods</span>
+            </a>
+        </div>
+        <nav class="sidebar-nav" role="navigation" aria-label="Боковая навигация">
+            <a href="index.html" class="nav-item"><span class="nav-icon" aria-hidden="true">🏠</span><span>Каталог</span></a>
+            <a href="news.html" class="nav-item"><span class="nav-icon" aria-hidden="true">📰</span><span>Новости</span></a>
+            <a href="modrinth.html" class="nav-item"><span class="nav-icon" aria-hidden="true">🌍</span><span>Modrinth</span></a>
+            <a href="github.html" class="nav-item"><span class="nav-icon" aria-hidden="true">🦊</span><span>GitHub</span></a>
+            <a href="feed.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">📡</span><span>Подписки</span></a>
+            <a href="favorites.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">❤️</span><span>Избранное</span></a>
+            <a href="upload.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">📤</span><span>Загрузить</span></a>
+            <a href="achievements.html" style="display:none" class="nav-item auth-only"><span class="nav-icon" aria-hidden="true">🏅</span><span>Достижения</span></a>
+        </nav>
+        <div class="sidebar-footer" id="sidebarAuth"></div>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        <header class="topbar" role="banner">
+            <button class="mobile-menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Меню">☰</button>
+            <div class="topbar-right" id="topbarRight" role="navigation" aria-label="Основная навигация"></div>
+        </header>
+
+        <div class="container">
+            <div id="pageContent">
+
+<div id="profileBox"></div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+document.addEventListener('click', function(e) {
+    var sidebar = document.querySelector('.sidebar');
+    var toggle = document.querySelector('.mobile-menu-toggle');
+    if (window.innerWidth <= 900 && sidebar.classList.contains('open')
+        && !sidebar.contains(e.target) && e.target !== toggle) {
+        sidebar.classList.remove('open');
+    }
+    var dropdown = document.querySelector('.user-dropdown');
+    var menuBtn = document.querySelector('.user-menu-btn');
+    if (dropdown && dropdown.classList.contains('open') && menuBtn
+        && !dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+        dropdown.classList.remove('open');
+    }
+});
+</script>
+<script src="static/js/main.js"></script>
+<script src="static/js/site.js"></script>
+
+</body>
+</html>
