@@ -23,6 +23,79 @@
         });
     };
     MM.fld = function (form, name) { return form.querySelector('[name="' + name + '"]'); };
+
+    /* ---------------- SVG-иконки интерфейса ----------------
+     * Стиль в духе Lucide/Feather: контурные, 24x24, currentColor.
+     * Использование: MM.icon('download') / MM.icon('github', 'ic-fill')
+     */
+    var _IC = {
+        home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+        news: '<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0V9"/><line x1="18" y1="14" x2="12" y2="14"/><line x1="18" y1="18" x2="12" y2="18"/><line x1="10" y1="6" x2="18" y2="6"/><line x1="18" y1="10" x2="10" y2="10"/>',
+        globe: '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+        github_fill: 'M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12',
+        rss: '<path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="2"/>',
+        heart: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+        upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+        trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>',
+        bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+        mail: '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
+        user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+        users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+        settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+        calendar: '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+        logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+        search: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+        download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+        eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+        star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+        message: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+        tag: '<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
+        x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+        chevron: '<polyline points="6 9 12 15 18 9"/>',
+        arrow_left: '<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+        arrow_right: '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+        package: '<path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+        cube: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/>',
+        clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+        folder: '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+        camera: '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+        image: '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+        zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+        flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+        sparkles: '<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/>',
+        shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+        lock: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+        check: '<polyline points="20 6 9 17 4 12"/>',
+        send: '<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
+        menu: '<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>',
+        target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+        refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+        fork: '<circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"/><path d="M12 12v3"/>',
+        layers: '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+        file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+        gamepad: '<line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.59C2.6 9.42 2 14.46 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.41-1.41A2 2 0 0 1 9.83 16h4.34a2 2 0 0 1 1.41.59L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.54-.6-6.58-.68-7.26A4 4 0 0 0 17.32 5z"/>'
+    };
+    var _FILL = { github_fill: 1 };
+    MM.icon = function (name, cls) {
+        var body = _IC[name];
+        if (!body) return '';
+        var fill = _FILL[name];
+        var inner = fill ? '<path d="' + body + '"/>' : body;
+        return '<svg class="ic ' + (cls || '') + '" viewBox="0 0 24 24" fill="' + (fill ? 'currentColor' : 'none') + '"' +
+            (fill ? '' : ' stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"') +
+            ' aria-hidden="true">' + inner + '</svg>';
+    };
+    MM.fmtBytes = function (b) {
+        b = Number(b) || 0;
+        if (b >= 1048576) return (b / 1048576).toFixed(1) + ' МБ';
+        if (b >= 1024) return (b / 1024).toFixed(0) + ' КБ';
+        return b + ' Б';
+    };
+    MM.fmtDate = function (iso) {
+        var d = new Date(iso);
+        if (isNaN(d)) return String(iso || '').slice(0, 10);
+        return ('0' + d.getDate()).slice(-2) + '.' + ('0' + (d.getMonth() + 1)).slice(-2) + '.' + d.getFullYear();
+    };
     MM.fmt = function (n) {
         n = Number(n) || 0;
         return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
@@ -49,6 +122,43 @@
             el.classList.remove('show');
             setTimeout(function () { el.remove(); }, 350);
         }, 3200);
+    };
+
+    /* ---------------- Modrinth: прямое скачивание ---------------- */
+    // Качает файл прямо через сайт (CDN Modrinth), без перехода на modrinth.com
+    MM.mrTriggerFile = function (url, filename) {
+        var a = document.createElement('a');
+        a.href = url;
+        if (filename) a.setAttribute('download', filename);
+        a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    };
+    MM.mrDownloadLatest = function (slug, mc, loader) {
+        var url = 'https://api.modrinth.com/v2/project/' + encodeURIComponent(slug) + '/version';
+        return fetch(url).then(function (r) {
+            if (!r.ok) throw new Error('http');
+            return r.json();
+        }).then(function (versions) {
+            if (!versions || !versions.length) throw new Error('empty');
+            var v = versions[0];
+            // если заданы фильтры — ищем подходящую версию
+            if (mc || loader) {
+                var found = versions.filter(function (x) {
+                    return (!mc || (x.game_versions || []).indexOf(mc) !== -1) &&
+                           (!loader || (x.loaders || []).indexOf(loader) !== -1);
+                })[0];
+                if (found) v = found;
+            }
+            var files = (v.files || []).filter(function (f) { return f.primary; });
+            var file = files[0] || (v.files || [])[0];
+            if (!file) throw new Error('nofile');
+            MM.mrTriggerFile(file.url, file.filename);
+            MM.toast('⬇ Скачивается: ' + file.filename);
+        }).catch(function () {
+            MM.toast('Не удалось получить файл с Modrinth', 'warn');
+        });
     };
 
     /* ---------------- Демо-каталог модов ---------------- */
@@ -91,17 +201,17 @@
                 '<div class="mod-mc-badge">MC ' + MM.esc(m.mc) + '</div>' +
             '</div>' +
             '<h3><a href="mod.html?m=' + MM.esc(m.id) + '">' + MM.esc(m.title) + '</a></h3>' +
-            '<p class="mod-meta"><span>v' + MM.esc(m.version) + '</span> <span>•</span> <span>👤 ' +
-                '<a href="user.html?u=' + encodeURIComponent(m.author) + '" class="author-link">' + MM.esc(m.author) + '</a></span></p>' +
+            '<p class="mod-meta"><span>v' + MM.esc(m.version) + '</span> <span>•</span> <span>' +
+                '<a href="user.html?u=' + encodeURIComponent(m.author) + '" class="author-link">' + MM.icon('user', 'ic-sm') + ' ' + MM.esc(m.author) + '</a></span></p>' +
             '<p class="mod-desc">' + MM.esc(m.desc) + '</p>' +
             (tags ? '<div class="mod-tags">' + tags + '</div>' : '') +
             '<div class="mod-footer">' +
                 '<div class="mod-stats">' +
-                    '<span class="stat-item">⬇ ' + MM.fmt(m.downloads) + '</span>' +
-                    '<span class="stat-item">❤ ' + MM.fmt(m.likes) + '</span>' +
-                    '<span class="stat-item">👁 ' + MM.fmt(m.views) + '</span>' +
+                    '<span class="stat-item">' + MM.icon('download', 'ic-sm') + ' ' + MM.fmt(m.downloads) + '</span>' +
+                    '<span class="stat-item">' + MM.icon('heart', 'ic-sm') + ' ' + MM.fmt(m.likes) + '</span>' +
+                    '<span class="stat-item">' + MM.icon('eye', 'ic-sm') + ' ' + MM.fmt(m.views) + '</span>' +
                 '</div>' +
-                '<a href="mod.html?m=' + MM.esc(m.id) + '#download" class="btn-download">Скачать</a>' +
+                '<a href="mod.html?m=' + MM.esc(m.id) + '#download" class="btn-download">' + MM.icon('download', 'ic-sm') + ' Скачать</a>' +
             '</div>' +
         '</div>';
     };
@@ -130,19 +240,19 @@
             ? '<img src="' + u.avatar + '" class="topbar-avatar" alt="Аватар ' + name + '">'
             : '<div class="topbar-avatar-letter">' + MM.esc((u.username || '?')[0].toUpperCase()) + '</div>';
         box.innerHTML =
-            '<a href="notifications.html" class="topbar-icon" title="Уведомления">🔔</a>' +
-            '<a href="messages.html" class="topbar-icon" title="Сообщения">💌</a>' +
+            '<a href="notifications.html" class="topbar-icon" title="Уведомления">' + MM.icon('bell') + '</a>' +
+            '<a href="messages.html" class="topbar-icon" title="Сообщения">' + MM.icon('mail') + '</a>' +
             '<div class="user-menu" role="menu">' +
                 '<button class="user-menu-btn" id="userMenuBtn" aria-haspopup="true">' + avatar +
                     '<span class="user-menu-name">' + name + '</span>' +
-                    '<span class="dropdown-arrow">▼</span>' +
+                    '<span class="dropdown-arrow">' + MM.icon('chevron', 'ic-xs') + '</span>' +
                 '</button>' +
                 '<div class="user-dropdown" role="menu">' +
-                    '<a href="profile.html" class="dropdown-item">👤 Профиль</a>' +
-                    '<a href="settings.html" class="dropdown-item">⚙️ Настройки</a>' +
-                    '<a href="activity.html" class="dropdown-item">📅 Активность</a>' +
+                    '<a href="profile.html" class="dropdown-item">' + MM.icon('user') + ' Профиль</a>' +
+                    '<a href="settings.html" class="dropdown-item">' + MM.icon('settings') + ' Настройки</a>' +
+                    '<a href="activity.html" class="dropdown-item">' + MM.icon('calendar') + ' Активность</a>' +
                     '<div class="dropdown-divider"></div>' +
-                    '<a href="#" class="dropdown-item logout" id="logoutBtn">🚪 Выйти</a>' +
+                    '<a href="#" class="dropdown-item logout" id="logoutBtn">' + MM.icon('logout') + ' Выйти</a>' +
                 '</div>' +
             '</div>';
         var btn = MM.$('#userMenuBtn'), dd = MM.$('.user-dropdown', box);
@@ -329,7 +439,7 @@
             var liked = MM.likes().indexOf(modId) !== -1;
             likeBtn.classList.toggle('liked', liked);
             var icon = MM.$('.like-icon', likeBtn), text = MM.$('.like-text', likeBtn), count = MM.$('.like-count', likeBtn);
-            if (icon) icon.textContent = liked ? '❤' : '🤍';
+            if (icon) icon.innerHTML = MM.icon('heart', liked ? 'ic-fill liked-heart' : '');
             if (text) text.textContent = liked ? 'В избранном' : 'Лайкнуть';
             if (count) count.textContent = MM.fmt(baseLikes + (liked ? 1 : 0));
         }
@@ -498,21 +608,21 @@
                 '<p class="profile-date">📅 С нами с ' + MM.esc(u.joined || '—') + '</p></div>' +
             '</div>' +
             '<div class="profile-stats">' +
-                '<div class="stat-card"><div class="stat-num">' + mods.length + '</div><div class="stat-label">📦 Модов</div></div>' +
-                '<div class="stat-card"><div class="stat-num">' + MM.fmt(dls) + '</div><div class="stat-label">⬇ Скачиваний</div></div>' +
-                '<div class="stat-card"><div class="stat-num">' + MM.fmt(likes) + '</div><div class="stat-label">❤ Лайков</div></div>' +
-                '<div class="stat-card"><div class="stat-num">0</div><div class="stat-label">👥 Подписчиков</div></div>' +
-                '<div class="stat-card"><div class="stat-num">' + follows + '</div><div class="stat-label">📡 Подписок</div></div>' +
+                '<div class="stat-card"><div class="stat-num">' + mods.length + '</div><div class="stat-label">' + MM.icon('package', 'ic-sm') + ' Модов</div></div>' +
+                '<div class="stat-card"><div class="stat-num">' + MM.fmt(dls) + '</div><div class="stat-label">' + MM.icon('download', 'ic-sm') + ' Скачиваний</div></div>' +
+                '<div class="stat-card"><div class="stat-num">' + MM.fmt(likes) + '</div><div class="stat-label">' + MM.icon('heart', 'ic-sm') + ' Лайков</div></div>' +
+                '<div class="stat-card"><div class="stat-num">0</div><div class="stat-label">' + MM.icon('users', 'ic-sm') + ' Подписчиков</div></div>' +
+                '<div class="stat-card"><div class="stat-num">' + follows + '</div><div class="stat-label">' + MM.icon('rss', 'ic-sm') + ' Подписок</div></div>' +
             '</div>' +
-            '<h3 class="section-title">📦 Мои моды</h3>' +
+            '<h3 class="section-title">' + MM.icon('package') + ' Мои моды</h3>' +
             '<div class="my-mods-grid">' +
                 (mods.length ? mods.map(function (m) {
                     return '<div class="my-mod-card">' +
                         '<div class="mod-category">' + MM.esc(m.category) + '</div>' +
                         '<a href="mod.html" class="my-mod-title">' + MM.esc(m.title) + '</a>' +
                         '<div class="my-mod-meta"><span>MC ' + MM.esc(m.mc) + '</span>' +
-                        '<span>⬇ ' + MM.fmt(m.downloads) + ' ❤ ' + MM.fmt(m.likes) + ' 👁 ' + MM.fmt(m.views) + '</span></div>' +
-                        '<button class="btn-delete" data-del="' + m.id + '">🗑 Удалить</button>' +
+                        '<span>' + MM.icon('download', 'ic-sm') + ' ' + MM.fmt(m.downloads) + ' ' + MM.icon('heart', 'ic-sm') + ' ' + MM.fmt(m.likes) + ' ' + MM.icon('eye', 'ic-sm') + ' ' + MM.fmt(m.views) + '</span></div>' +
+                        '<button class="btn-delete" data-del="' + m.id + '">Удалить</button>' +
                     '</div>';
                 }).join('') :
                 '<div class="empty-state"><div class="empty-icon">📦</div><h3>У тебя пока нет модов</h3>' +
@@ -709,16 +819,16 @@
                 '<p class="profile-bio">' + MM.esc(BIOS[name] || 'Моддер сообщества MineMods') + '</p>' +
                 '<p class="profile-date">📅 С нами с 2025 года</p>' +
                 '<div class="profile-actions">' + subBtn() +
-                    '<a href="chat.html?u=' + encodeURIComponent(name) + '" class="btn-subscribe" style="background:var(--bg-card);color:var(--text-main);border:2px solid var(--border)">💌 Написать</a>' +
-                    '<a href="activity.html" class="btn-subscribe" style="background:var(--bg-card);color:var(--text-main);border:2px solid var(--border)">📅 Активность</a>' +
+                    '<a href="chat.html?u=' + encodeURIComponent(name) + '" class="btn-subscribe" style="background:var(--bg-card);color:var(--text-main);border:2px solid var(--border)">' + MM.icon('mail', 'ic-sm') + ' Написать</a>' +
+                    '<a href="activity.html" class="btn-subscribe" style="background:var(--bg-card);color:var(--text-main);border:2px solid var(--border)">' + MM.icon('calendar', 'ic-sm') + ' Активность</a>' +
                 '</div></div>' +
             '</div>' +
             '<div class="profile-stats">' +
-                '<div class="stat-card"><div class="stat-num">' + mods.length + '</div><div class="stat-label">📦 Модов</div></div>' +
-                '<div class="stat-card"><div class="stat-num">' + MM.fmt(dls) + '</div><div class="stat-label">⬇ Скачиваний</div></div>' +
-                '<div class="stat-card"><div class="stat-num">' + MM.fmt(lk) + '</div><div class="stat-label">❤ Лайков</div></div>' +
+                '<div class="stat-card"><div class="stat-num">' + mods.length + '</div><div class="stat-label">' + MM.icon('package', 'ic-sm') + ' Модов</div></div>' +
+                '<div class="stat-card"><div class="stat-num">' + MM.fmt(dls) + '</div><div class="stat-label">' + MM.icon('download', 'ic-sm') + ' Скачиваний</div></div>' +
+                '<div class="stat-card"><div class="stat-num">' + MM.fmt(lk) + '</div><div class="stat-label">' + MM.icon('heart', 'ic-sm') + ' Лайков</div></div>' +
             '</div>' +
-            '<h3 class="section-title">📦 Моды автора</h3>' +
+            '<h3 class="section-title">' + MM.icon('package') + ' Моды автора</h3>' +
             '<div class="mods-grid">' +
                 (mods.length ? mods.map(MM.modCardHTML).join('') :
                 '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📦</div><h3>У автора пока нет модов</h3></div>') +
@@ -865,18 +975,37 @@
                     .map(function (c) { return '<span class="mr-tag">' + MM.esc(c) + '</span>'; }).join('');
                 var mcv = (m.versions || []).filter(function (v) { return /^\d+\.\d+(\.\d+)?$/.test(v); });
                 var lastV = mcv.length ? mcv[mcv.length - 1] : '';
-                var icon = m.icon_url ? '<img src="' + MM.esc(m.icon_url) + '" alt="">' : '<div class="mr-no-icon">📦</div>';
-                return '<a class="mr-card" href="https://modrinth.com/project/' + MM.esc(m.slug) + '" target="_blank" rel="noopener">' +
-                    '<div class="mr-card-icon">' + icon + '</div>' +
-                    '<div class="mr-card-body">' +
-                        '<div class="mr-card-header"><h3>' + MM.esc(m.title) + '</h3><span class="mr-author">' + MM.esc(m.author) + '</span></div>' +
-                        '<p class="mr-desc">' + MM.esc(m.description).slice(0, 140) + '</p>' +
-                        (cats ? '<div class="mr-categories">' + cats + '</div>' : '') +
-                        (lastV ? '<div class="version-info"><span class="v-badge v-mc"><span class="v-label">MC:</span> <strong>' + MM.esc(lastV) + '</strong></span></div>' : '') +
-                        '<div class="mr-stats"><span>⬇ ' + MM.fmt(m.downloads) + '</span><span>⭐ ' + MM.fmt(m.follows) + '</span></div>' +
-                    '</div></a>';
+                var icon = m.icon_url ? '<img src="' + MM.esc(m.icon_url) + '" alt="" loading="lazy">' :
+                    '<div class="mr-no-icon">' + MM.icon('package') + '</div>';
+                var pageUrl = 'modrinth-project.html?slug=' + encodeURIComponent(m.slug || m.project_id);
+                return '<div class="mr-card">' +
+                    '<a class="mr-card-main" href="' + pageUrl + '">' +
+                        '<div class="mr-card-icon">' + icon + '</div>' +
+                        '<div class="mr-card-body">' +
+                            '<div class="mr-card-header"><h3>' + MM.esc(m.title) + '</h3><span class="mr-author">' + MM.icon('user', 'ic-sm') + ' ' + MM.esc(m.author) + '</span></div>' +
+                            '<p class="mr-desc">' + MM.esc(m.description).slice(0, 140) + '</p>' +
+                            (cats ? '<div class="mr-categories">' + cats + '</div>' : '') +
+                            (lastV ? '<div class="version-info"><span class="v-badge v-mc"><span class="v-label">MC:</span> <strong>' + MM.esc(lastV) + '</strong></span></div>' : '') +
+                            '<div class="mr-stats"><span>' + MM.icon('download', 'ic-sm') + ' ' + MM.fmt(m.downloads) + '</span><span>' + MM.icon('star', 'ic-sm') + ' ' + MM.fmt(m.follows) + '</span></div>' +
+                        '</div>' +
+                    '</a>' +
+                    '<button class="mr-dl" data-dl="' + MM.esc(m.slug || m.project_id) + '" title="Скачать последнюю версию">' + MM.icon('download') + '</button>' +
+                '</div>';
             }).join('');
         }
+
+        // Быстрая загрузка последней версии прямо с карточки
+        grid.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-dl]');
+            if (!btn) return;
+            e.preventDefault();
+            btn.disabled = true;
+            btn.classList.add('loading');
+            MM.mrDownloadLatest(btn.getAttribute('data-dl')).finally(function () {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+            });
+        });
 
         function renderPagination(totalPages) {
             var pg = MM.$('#mrPagination');
@@ -941,6 +1070,171 @@
         go();
     }
 
+    /* ================= MODRINTH: СТРАНИЦА ПРОЕКТА + СКАЧИВАНИЕ ================= */
+    function initMrProject() {
+        var box = MM.$('#mrpBox');
+        if (!box) return;
+        var slug = MM.qp('slug') || MM.qp('p') || 'sodium';
+        var verBox = MM.$('#mrpVersions');
+        var mcSel = MM.$('#mrpMc');
+        var ldSel = MM.$('#mrpLoader');
+
+        var project = null, versions = [], author = '';
+
+        function mcVersions() {
+            var set = [];
+            versions.forEach(function (v) {
+                (v.game_versions || []).forEach(function (g) {
+                    if (set.indexOf(g) === -1) set.push(g);
+                });
+            });
+            return set;
+        }
+        function loaders() {
+            var set = [];
+            versions.forEach(function (v) {
+                (v.loaders || []).forEach(function (l) {
+                    if (set.indexOf(l) === -1) set.push(l);
+                });
+            });
+            return set;
+        }
+        function cap(s) { return s ? s[0].toUpperCase() + s.slice(1) : s; }
+
+        function renderVersions() {
+            var mc = mcSel ? mcSel.value : '';
+            var ld = ldSel ? ldSel.value : '';
+            var list = versions.filter(function (v) {
+                return (!mc || (v.game_versions || []).indexOf(mc) !== -1) &&
+                       (!ld || (v.loaders || []).indexOf(ld) !== -1);
+            });
+            var cnt = MM.$('#mrpVerCount');
+            if (cnt) cnt.textContent = String(list.length);
+            if (!list.length) {
+                verBox.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><h3>Нет версий под выбранные фильтры</h3></div>';
+                return;
+            }
+            verBox.innerHTML = list.slice(0, 30).map(function (v, i) {
+                var file = (v.files || []).filter(function (f) { return f.primary; })[0] || (v.files || [])[0] || {};
+                var mcv = (v.game_versions || []).slice(0, 4).map(function (g) { return '<span class="v-badge v-mc">' + MM.esc(g) + '</span>'; }).join('');
+                var more = (v.game_versions || []).length - 4;
+                var lds = (v.loaders || []).map(function (l) { return '<span class="v-badge v-loader">' + MM.esc(l) + '</span>'; }).join('');
+                return '<div class="ver-item">' +
+                    '<div class="ver-main">' +
+                        '<div class="ver-name">' + MM.esc(v.name || v.version_number) +
+                            (v.version_type ? '<span class="ver-type ver-' + MM.esc(v.version_type) + '">' + MM.esc(v.version_type) + '</span>' : '') +
+                        '</div>' +
+                        '<div class="ver-meta">' +
+                            '<span class="ver-chips">' + mcv + (more > 0 ? '<span class="v-badge">+' + more + '</span>' : '') + lds + '</span>' +
+                        '</div>' +
+                        '<div class="ver-sub">' +
+                            '<span>' + MM.icon('calendar', 'ic-sm') + ' ' + MM.fmtDate(v.date_published) + '</span>' +
+                            '<span>' + MM.icon('download', 'ic-sm') + ' ' + MM.fmt(v.downloads) + '</span>' +
+                            (file.size ? '<span>' + MM.icon('file', 'ic-sm') + ' ' + MM.fmtBytes(file.size) + '</span>' : '') +
+                        '</div>' +
+                    '</div>' +
+                    (file.url ?
+                        '<button class="ver-dl" data-url="' + MM.esc(file.url) + '" data-file="' + MM.esc(file.filename || '') + '">' +
+                            MM.icon('download') + '<span>Скачать</span>' +
+                        '</button>' : '') +
+                '</div>';
+            }).join('');
+        }
+
+        function renderProject() {
+            var icon = project.icon_url ? '<img src="' + MM.esc(project.icon_url) + '" alt="">' :
+                '<div class="mrpp-noicon">' + MM.icon('package') + '</div>';
+            var cats = (project.categories || []).map(function (c) { return '<span class="mr-tag">' + MM.esc(c) + '</span>'; }).join('');
+            var lds = (project.loaders || []).map(function (l) { return '<span class="v-badge v-loader">' + MM.esc(l) + '</span>'; }).join('');
+            var gallery = (project.gallery || []).slice(0, 6);
+            box.innerHTML =
+                '<a href="modrinth.html" class="back-btn">' + MM.icon('arrow_left', 'ic-sm') + ' К поиску Modrinth</a>' +
+                '<div class="mrpp-head">' +
+                    '<div class="mrpp-icon">' + icon + '</div>' +
+                    '<div class="mrpp-info">' +
+                        '<h1>' + MM.esc(project.title) + '</h1>' +
+                        (author ? '<div class="mrpp-author">' + MM.icon('user', 'ic-sm') + ' ' + MM.esc(author) + '</div>' : '') +
+                        '<p class="mrpp-desc">' + MM.esc(project.description || '') + '</p>' +
+                        '<div class="mrpp-stats">' +
+                            '<span>' + MM.icon('download', 'ic-sm') + ' <strong>' + MM.fmt(project.downloads) + '</strong> скачиваний</span>' +
+                            '<span>' + MM.icon('heart', 'ic-sm') + ' <strong>' + MM.fmt(project.followers) + '</strong> подписчиков</span>' +
+                            '<span>' + MM.icon('clock', 'ic-sm') + ' обновлён ' + MM.fmtDate(project.updated) + '</span>' +
+                        '</div>' +
+                        '<div class="mrpp-tags">' + cats + lds + '</div>' +
+                        '<div class="mrpp-actions">' +
+                            '<button class="btn-download-big" id="mrpLatest">' + MM.icon('download', 'ic-sm') + ' Скачать последнюю версию</button>' +
+                            '<a class="btn-hero btn-hero-ghost mrp-ext" href="https://modrinth.com/project/' + MM.esc(project.slug || slug) + '" target="_blank" rel="noopener">На Modrinth ↗</a>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                (gallery.length ?
+                    '<div class="mrp-gallery">' + gallery.map(function (g) {
+                        return '<img src="' + MM.esc(g.url) + '" alt="" loading="lazy" onclick="openLightbox(\'' + MM.esc(g.url) + '\')">';
+                    }).join('') + '</div>' : '') +
+                (project.body ? '' : '');
+
+            document.title = project.title + ' — MineMods × Modrinth';
+            var lat = MM.$('#mrpLatest');
+            if (lat) lat.addEventListener('click', function () { MM.mrDownloadLatest(slug); });
+        }
+
+        // Фильтры версий
+        function fillFilters() {
+            if (mcSel) {
+                mcSel.innerHTML = '<option value="">Все версии MC</option>' +
+                    mcVersions().map(function (v) { return '<option value="' + MM.esc(v) + '">' + MM.esc(v) + '</option>'; }).join('');
+            }
+            if (ldSel) {
+                ldSel.innerHTML = '<option value="">Все загрузчики</option>' +
+                    loaders().map(function (l) { return '<option value="' + MM.esc(l) + '">' + MM.esc(cap(l)) + '</option>'; }).join('');
+            }
+        }
+        if (mcSel) mcSel.addEventListener('change', renderVersions);
+        if (ldSel) ldSel.addEventListener('change', renderVersions);
+
+        // Клик по кнопке скачивания версии
+        if (verBox) verBox.addEventListener('click', function (e) {
+            var b = e.target.closest('.ver-dl');
+            if (!b) return;
+            MM.mrTriggerFile(b.getAttribute('data-url'), b.getAttribute('data-file'));
+            MM.toast('⬇ Скачивается: ' + (b.getAttribute('data-file') || 'файл'));
+        });
+
+        // Лайтбокс для галереи
+        window.openLightbox = window.openLightbox || function (src) {
+            var lb = MM.$('#lightbox'); if (!lb) return;
+            MM.$('#lightbox-img').src = src;
+            lb.classList.add('active');
+        };
+        window.closeLightbox = window.closeLightbox || function () {
+            var lb = MM.$('#lightbox'); if (lb) lb.classList.remove('active');
+        };
+
+        // Загрузка данных (проект + версии + автор параллельно)
+        box.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><h3>Загрузка проекта…</h3></div>';
+        if (verBox) verBox.innerHTML = '';
+        var pProject = fetch('https://api.modrinth.com/v2/project/' + encodeURIComponent(slug)).then(function (r) {
+            if (!r.ok) throw new Error('http');
+            return r.json();
+        });
+        var pVersions = fetch('https://api.modrinth.com/v2/project/' + encodeURIComponent(slug) + '/version').then(function (r) { return r.ok ? r.json() : []; });
+        var pAuthor = fetch('https://api.modrinth.com/v2/project/' + encodeURIComponent(slug) + '/members').then(function (r) { return r.ok ? r.json() : []; });
+
+        Promise.all([pProject, pVersions, pAuthor]).then(function (arr) {
+            project = arr[0];
+            versions = (arr[1] || []);
+            author = (arr[2] && arr[2][0] && arr[2][0].user && arr[2][0].user.username) || '';
+            renderProject();
+            fillFilters();
+            renderVersions();
+        }).catch(function () {
+            box.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div>' +
+                '<h3>Проект не найден или API недоступен</h3>' +
+                '<p>Проверь ссылку или попробуй позже.</p>' +
+                '<a href="modrinth.html" class="btn-download-big">← К поиску Modrinth</a></div>';
+        });
+    }
+
     /* ================= GITHUB (живой API) ================= */
     function initGitHub() {
         var grid = MM.$('#ghResults');
@@ -982,10 +1276,10 @@
                         '<div class="mr-card-header"><h3>' + MM.esc(r.name) + '</h3><span class="gh-author">' + MM.esc(r.owner.login) + '</span></div>' +
                         '<p class="mr-desc">' + MM.esc((r.description || 'Без описания')).slice(0, 140) + '</p>' +
                         (topics ? '<div class="mr-categories">' + topics + '</div>' : '') +
-                        '<div class="mr-stats"><span>⭐ ' + MM.fmt(r.stargazers_count) + '</span>' +
-                        '<span>🍴 ' + MM.fmt(r.forks_count) + '</span>' +
+                        '<div class="mr-stats"><span>' + MM.icon('star', 'ic-sm') + ' ' + MM.fmt(r.stargazers_count) + '</span>' +
+                        '<span>' + MM.icon('fork', 'ic-sm') + ' ' + MM.fmt(r.forks_count) + '</span>' +
                         (r.language ? '<span class="gh-lang">' + MM.esc(r.language) + '</span>' : '') +
-                        '<span>📅 ' + MM.esc(String(r.updated_at || '').slice(0, 10)) + '</span></div>' +
+                        '<span>' + MM.icon('calendar', 'ic-sm') + ' ' + MM.esc(String(r.updated_at || '').slice(0, 10)) + '</span></div>' +
                     '</div></a>';
             }).join('');
         }
@@ -1070,6 +1364,7 @@
             case 'chat':          initChat(); break;
             case 'notifications': initNotifications(); break;
             case 'modrinth':      initModrinth(); break;
+            case 'mrproject':     initMrProject(); break;
             case 'github':        initGitHub(); break;
         }
     });
