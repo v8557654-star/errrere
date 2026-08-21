@@ -49,6 +49,110 @@
         </form>
     </div>
 
+    <div class="settings-card appearance-card">
+        <div class="settings-card-heading">
+            <div>
+                <h3>🪄 Свой стиль</h3>
+                <p class="settings-desc">Цвета, плотность, фон и форма карточек — всё под твой вкус.</p>
+            </div>
+            <span class="custom-badge">LIVE</span>
+        </div>
+
+        <form method="POST" id="appearanceForm">
+            <input type="hidden" name="action" value="appearance">
+
+            <div class="appearance-preview" aria-label="Предпросмотр интерфейса">
+                <div class="appearance-preview-top">
+                    <span class="preview-brand">⛏ MineMods</span>
+                    <span class="preview-dot"></span>
+                </div>
+                <div class="appearance-preview-body">
+                    <div class="preview-sidebar-lines"><i></i><i></i><i></i></div>
+                    <div class="preview-content">
+                        <span class="preview-title"></span>
+                        <span class="preview-line"></span>
+                        <div class="preview-cards"><i></i><i></i><i></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <label class="switch-row custom-colors-row" for="custom-colors-toggle">
+                <span>
+                    Своя палитра
+                    <small>Перекрывает акцент выбранной темы</small>
+                </span>
+                <span class="switch">
+                    <input id="custom-colors-toggle" type="checkbox" name="custom_colors" {% if current_user.accent_color and current_user.accent_color_secondary %}checked{% endif %}>
+                    <span class="slider"></span>
+                </span>
+            </label>
+
+            <div class="color-controls" id="colorControls">
+                <label class="color-field" for="accent-color">
+                    <span>Основной цвет</span>
+                    <span class="color-input-wrap">
+                        <input id="accent-color" type="color" name="accent_color" value="{{ current_user.accent_color or '#22ff88' }}">
+                        <output for="accent-color" data-color-value>{{ current_user.accent_color or '#22ff88' }}</output>
+                    </span>
+                </label>
+                <label class="color-field" for="accent-color-secondary">
+                    <span>Второй цвет</span>
+                    <span class="color-input-wrap">
+                        <input id="accent-color-secondary" type="color" name="accent_color_secondary" value="{{ current_user.accent_color_secondary or '#00d4ff' }}">
+                        <output for="accent-color-secondary" data-color-value>{{ current_user.accent_color_secondary or '#00d4ff' }}</output>
+                    </span>
+                </label>
+            </div>
+
+            <div class="appearance-options">
+                <fieldset>
+                    <legend>Плотность интерфейса</legend>
+                    <div class="segmented-control" role="radiogroup" aria-label="Плотность интерфейса">
+                        {% for value, label, icon in [('compact', 'Компактно', '▦'), ('comfortable', 'Удобно', '▤'), ('spacious', 'Свободно', '▥')] %}
+                        <label class="choice-chip">
+                            <input type="radio" name="interface_density" value="{{ value }}" {% if current_user.interface_density == value or (not current_user.interface_density and value == 'comfortable') %}checked{% endif %}>
+                            <span><b>{{ icon }}</b>{{ label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Форма элементов</legend>
+                    <div class="segmented-control" role="radiogroup" aria-label="Форма элементов">
+                        {% for value, label, icon in [('sharp', 'Строго', '◼'), ('rounded', 'Обычно', '▣'), ('soft', 'Мягко', '●')] %}
+                        <label class="choice-chip">
+                            <input type="radio" name="corner_style" value="{{ value }}" {% if current_user.corner_style == value or (not current_user.corner_style and value == 'rounded') %}checked{% endif %}>
+                            <span><b>{{ icon }}</b>{{ label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Фон</legend>
+                    <div class="background-options" role="radiogroup" aria-label="Стиль фона">
+                        {% for value, label, desc in [('aurora', 'Аврора', 'мягкое свечение'), ('grid', 'Сетка', 'чёткая структура'), ('minimal', 'Минимал', 'ничего лишнего'), ('nebula', 'Туманность', 'глубина и цвет')] %}
+                        <label class="background-choice background-{{ value }}">
+                            <input type="radio" name="background_style" value="{{ value }}" {% if current_user.background_style == value or (not current_user.background_style and value == 'aurora') %}checked{% endif %}>
+                            <span class="background-swatch" aria-hidden="true"></span>
+                            <span><b>{{ label }}</b><small>{{ desc }}</small></span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="appearance-actions">
+                <button type="submit" class="btn-save">Сохранить стиль</button>
+                <button type="submit" form="resetAppearanceForm" class="btn-reset">Сбросить</button>
+            </div>
+        </form>
+        <form method="POST" id="resetAppearanceForm" class="visually-hidden">
+            <input type="hidden" name="action" value="reset_appearance">
+        </form>
+    </div>
+
     <div class="settings-card">
         <h3>✨ Анимации</h3>
         <p class="settings-desc">Включи или выключи анимации интерфейса</p>

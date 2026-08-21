@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import re
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify, abort, Response, stream_with_context
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from flask_sqlalchemy import SQLAlchemy
@@ -54,6 +55,11 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     theme = db.Column(db.String(20), default='green')
     animations = db.Column(db.Boolean, default=True)
+    accent_color = db.Column(db.String(7), default='')
+    accent_color_secondary = db.Column(db.String(7), default='')
+    interface_density = db.Column(db.String(20), default='comfortable')
+    corner_style = db.Column(db.String(20), default='rounded')
+    background_style = db.Column(db.String(20), default='aurora')
     bio = db.Column(db.String(300), default='')
     avatar = db.Column(db.String(300), default='')
     is_banned = db.Column(db.Boolean, default=False)
@@ -236,17 +242,45 @@ def log_activity(user_id, type, text, link=''):
     a = Activity(user_id=user_id, type=type, text=text, link=link)
     db.session.add(a)
 
+def is_hex_color(value):
+    """Accept only six-digit hexadecimal colors before adding them to page styles."""
+    return bool(re.fullmatch(r'#[0-9a-fA-F]{6}', value or ''))
+
+def appearance_context(user=None):
+    """Return safe, template-ready appearance settings for a user or a visitor."""
+    if not user:
+        return {
+            'user_theme': 'green', 'user_animations': True,
+            'user_density': 'comfortable', 'user_corners': 'rounded',
+            'user_background': 'aurora', 'custom_color_vars': '',
+        }
+
+    accent = user.accent_color if is_hex_color(user.accent_color) else ''
+    accent_secondary = user.accent_color_secondary if is_hex_color(user.accent_color_secondary) else ''
+    custom_color_vars = ''
+    if accent and accent_secondary:
+        custom_color_vars = f'--user-accent: {accent}; --user-accent-2: {accent_secondary};'
+
+    return {
+        'user_theme': user.theme if user.theme in {'green', 'blue', 'purple', 'orange', 'pink', 'light', 'amoled'} else 'green',
+        'user_animations': user.animations,
+        'user_density': user.interface_density if user.interface_density in {'compact', 'comfortable', 'spacious'} else 'comfortable',
+        'user_corners': user.corner_style if user.corner_style in {'sharp', 'rounded', 'soft'} else 'rounded',
+        'user_background': user.background_style if user.background_style in {'aurora', 'grid', 'minimal', 'nebula'} else 'aurora',
+        'custom_color_vars': custom_color_vars,
+    }
+
 @app.context_processor
 def inject_globals():
     if current_user.is_authenticated:
         return dict(
-            user_theme=current_user.theme, user_animations=current_user.animations,
+            **appearance_context(current_user),
             ACHIEVEMENTS=ACHIEVEMENTS,
             unread_notif=current_user.unread_notifications,
             unread_msg=current_user.unread_messages,
             is_admin=current_user.is_admin,
         )
-    return dict(user_theme='green', user_animations=True, ACHIEVEMENTS=ACHIEVEMENTS,
+    return dict(**appearance_context(), ACHIEVEMENTS=ACHIEVEMENTS,
                 unread_notif=0, unread_msg=0, is_admin=False)
 
 @app.before_request
@@ -591,8 +625,46 @@ def settings():
     if request.method == 'POST':
         action = request.form.get('action')
         if action == 'theme':
-            current_user.theme = request.form.get('theme', 'green')
-            db.session.commit(); flash('Тема изменена!', 'success')
+            theme = request.form.get('theme', 'green')
+            if theme not in {'green', 'blue', 'purple', 'orange', 'pink', 'light', 'amoled'}:
+                flash('Неизвестная тема', 'error')
+            else:
+                current_user.theme = theme
+                db.session.commit(); flash('Тема изменена!', 'success')
+        elif action == 'appearance':
+            density = request.form.get('interface_density', 'comfortable')
+            corners = request.form.get('corner_style', 'rounded')
+            background = request.form.get('background_style', 'aurora')
+            if density not in {'compact', 'comfortable', 'spacious'} or \
+               corners not in {'sharp', 'rounded', 'soft'} or \
+               background not in {'aurora', 'grid', 'minimal', 'nebula'}:
+                flash('Не удалось сохранить внешний вид: выбери вариант из списка', 'error')
+            elif 'custom_colors' in request.form:
+                accent = request.form.get('accent_color', '').strip()
+                accent_secondary = request.form.get('accent_color_secondary', '').strip()
+                if not is_hex_color(accent) or not is_hex_color(accent_secondary):
+                    flash('Цвета должны быть в формате #RRGGBB', 'error')
+                    return redirect(url_for('settings'))
+                current_user.accent_color = accent.lower()
+                current_user.accent_color_secondary = accent_secondary.lower()
+                current_user.interface_density = density
+                current_user.corner_style = corners
+                current_user.background_style = background
+                db.session.commit(); flash('Твой стиль сохранён!', 'success')
+            else:
+                current_user.accent_color = ''
+                current_user.accent_color_secondary = ''
+                current_user.interface_density = density
+                current_user.corner_style = corners
+                current_user.background_style = background
+                db.session.commit(); flash('Внешний вид сохранён. Используется палитра темы.', 'success')
+        elif action == 'reset_appearance':
+            current_user.accent_color = ''
+            current_user.accent_color_secondary = ''
+            current_user.interface_density = 'comfortable'
+            current_user.corner_style = 'rounded'
+            current_user.background_style = 'aurora'
+            db.session.commit(); flash('Стиль возвращён к настройкам по умолчанию.', 'success')
         elif action == 'animations':
             current_user.animations = 'animations' in request.form
             db.session.commit(); flash('Настройки сохранены!', 'success')
@@ -1051,6 +1123,11 @@ with app.app_context():
             for sql in [
                 "ALTER TABLE user ADD COLUMN theme VARCHAR(20) DEFAULT 'green'",
                 "ALTER TABLE user ADD COLUMN animations BOOLEAN DEFAULT 1",
+                "ALTER TABLE user ADD COLUMN accent_color VARCHAR(7) DEFAULT ''",
+                "ALTER TABLE user ADD COLUMN accent_color_secondary VARCHAR(7) DEFAULT ''",
+                "ALTER TABLE user ADD COLUMN interface_density VARCHAR(20) DEFAULT 'comfortable'",
+                "ALTER TABLE user ADD COLUMN corner_style VARCHAR(20) DEFAULT 'rounded'",
+                "ALTER TABLE user ADD COLUMN background_style VARCHAR(20) DEFAULT 'aurora'",
                 "ALTER TABLE user ADD COLUMN bio VARCHAR(300) DEFAULT ''",
                 "ALTER TABLE user ADD COLUMN avatar VARCHAR(300) DEFAULT ''",
                 "ALTER TABLE user ADD COLUMN is_banned BOOLEAN DEFAULT 0",

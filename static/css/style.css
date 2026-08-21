@@ -4024,3 +4024,317 @@ body {
         font-size: 20px;
     }
 }
+
+/* ===== PERSONAL APPEARANCE ===== */
+/* User-supplied colors are validated server-side before these variables are rendered. */
+html[data-custom-colors="on"] {
+    --accent: var(--user-accent);
+    --accent-2: var(--user-accent-2);
+    --gradient: linear-gradient(135deg, var(--user-accent), var(--user-accent-2));
+}
+
+/* Background choices */
+html[data-background="aurora"] body {
+    background:
+        radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 30%),
+        radial-gradient(circle at 90% 82%, color-mix(in srgb, var(--accent-2) 15%, transparent), transparent 34%),
+        linear-gradient(135deg, var(--bg-main), color-mix(in srgb, var(--bg-main) 88%, var(--accent-2))) !important;
+    background-attachment: fixed;
+}
+
+html[data-background="grid"] body {
+    background-color: var(--bg-main) !important;
+    background-image:
+        linear-gradient(color-mix(in srgb, var(--border) 52%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--border) 52%, transparent) 1px, transparent 1px) !important;
+    background-size: 34px 34px !important;
+    animation: none !important;
+}
+
+html[data-background="minimal"] body {
+    background: var(--bg-main) !important;
+    animation: none !important;
+}
+
+html[data-background="nebula"] body {
+    background:
+        radial-gradient(circle at 15% 15%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 27%),
+        radial-gradient(circle at 85% 25%, color-mix(in srgb, var(--accent-2) 18%, transparent), transparent 32%),
+        radial-gradient(circle at 52% 92%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 35%),
+        var(--bg-main) !important;
+    background-attachment: fixed !important;
+}
+
+/* Density changes use spacing only, so reading rhythm and mobile layouts remain intact. */
+html[data-density="compact"] .sidebar { width: 232px; padding: 18px 12px 12px; }
+html[data-density="compact"] .main-content { margin-left: 232px; }
+html[data-density="compact"] .container { padding: 24px; }
+html[data-density="compact"] .sidebar-header { padding-bottom: 16px; margin-bottom: 12px; }
+html[data-density="compact"] .nav-item { padding: 9px 11px; }
+html[data-density="compact"] .mods-grid { gap: 12px; }
+html[data-density="compact"] .mod-card,
+html[data-density="compact"] .settings-card,
+html[data-density="compact"] .top-card,
+html[data-density="compact"] .form-page { padding: 16px; }
+
+html[data-density="spacious"] .container { max-width: 1320px; padding: 42px; }
+html[data-density="spacious"] .sidebar { padding-top: 30px; }
+html[data-density="spacious"] .nav-item { padding: 14px 16px; }
+html[data-density="spacious"] .mods-grid,
+html[data-density="spacious"] .settings-grid { gap: 24px; }
+html[data-density="spacious"] .mod-card,
+html[data-density="spacious"] .settings-card,
+html[data-density="spacious"] .top-card,
+html[data-density="spacious"] .form-page { padding: 28px; }
+
+/* A small, deliberate set of common surfaces follows the selected corner language. */
+html[data-corners="sharp"] {
+    --radius-sm: 4px;
+    --radius-md: 7px;
+    --radius-lg: 10px;
+}
+html[data-corners="soft"] {
+    --radius-sm: 12px;
+    --radius-md: 18px;
+    --radius-lg: 26px;
+}
+html[data-corners="sharp"] .mod-card,
+html[data-corners="sharp"] .settings-card,
+html[data-corners="sharp"] .top-card,
+html[data-corners="sharp"] .form-page,
+html[data-corners="sharp"] .news-item,
+html[data-corners="sharp"] .comment,
+html[data-corners="sharp"] .achievement,
+html[data-corners="sharp"] .notif,
+html[data-corners="sharp"] .chat-item,
+html[data-corners="sharp"] .activity-item,
+html[data-corners="sharp"] .admin-stat-card,
+html[data-corners="sharp"] .admin-block,
+html[data-corners="sharp"] .empty-state { border-radius: var(--radius-md) !important; }
+html[data-corners="soft"] .mod-card,
+html[data-corners="soft"] .settings-card,
+html[data-corners="soft"] .top-card,
+html[data-corners="soft"] .form-page,
+html[data-corners="soft"] .news-item,
+html[data-corners="soft"] .comment,
+html[data-corners="soft"] .achievement,
+html[data-corners="soft"] .notif,
+html[data-corners="soft"] .chat-item,
+html[data-corners="soft"] .activity-item,
+html[data-corners="soft"] .admin-stat-card,
+html[data-corners="soft"] .admin-block,
+html[data-corners="soft"] .empty-state { border-radius: var(--radius-lg) !important; }
+
+/* Settings controls */
+.settings-card-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.settings-card-heading .settings-desc { margin-bottom: 20px; }
+
+.custom-badge {
+    padding: 5px 8px;
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+    border-radius: 999px;
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.appearance-preview {
+    overflow: hidden;
+    margin: 2px 0 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-main);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 7%, transparent);
+}
+
+.appearance-preview-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 38px;
+    padding: 0 14px;
+    color: #0f1626;
+    background: var(--gradient);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.preview-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(15, 22, 38, 0.55);
+    box-shadow: 14px 0 0 rgba(15, 22, 38, 0.32), 28px 0 0 rgba(15, 22, 38, 0.18);
+}
+
+.appearance-preview-body { display: flex; min-height: 112px; }
+.preview-sidebar-lines {
+    display: flex;
+    flex: 0 0 28%;
+    flex-direction: column;
+    gap: 10px;
+    padding: 17px 12px;
+    border-right: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg-sidebar) 86%, transparent);
+}
+.preview-sidebar-lines i,
+.preview-line,
+.preview-title,
+.preview-cards i { display: block; border-radius: 999px; }
+.preview-sidebar-lines i { height: 7px; background: var(--border); }
+.preview-sidebar-lines i:first-child { background: var(--accent); }
+.preview-content { flex: 1; padding: 17px; }
+.preview-title { width: 41%; height: 9px; background: var(--text-main); opacity: 0.8; }
+.preview-line { width: 67%; height: 6px; margin-top: 10px; background: var(--text-muted); opacity: 0.55; }
+.preview-cards { display: flex; gap: 8px; margin-top: 16px; }
+.preview-cards i { flex: 1; height: 38px; border: 1px solid var(--border); background: var(--bg-card); }
+.preview-cards i:first-child { border-color: var(--accent); box-shadow: inset 0 3px 0 var(--accent); }
+
+.custom-colors-row small {
+    display: block;
+    margin-top: 2px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.color-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 10px 0 22px;
+    transition: opacity 0.2s, filter 0.2s;
+}
+
+.color-controls.is-disabled { opacity: 0.42; filter: grayscale(0.65); }
+.color-controls.is-disabled input { cursor: not-allowed; }
+
+.settings-card .color-field { margin: 0; }
+.color-field > span:first-child { display: block; margin-bottom: 7px; }
+.color-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-main);
+}
+.settings-card .color-input-wrap input[type="color"] {
+    width: 34px;
+    min-width: 34px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    cursor: pointer;
+}
+.settings-card .color-input-wrap output {
+    color: var(--text-main);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.appearance-options { display: grid; gap: 20px; }
+.appearance-options fieldset { min-width: 0; border: 0; }
+.appearance-options legend {
+    margin-bottom: 9px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.segmented-control { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.settings-card .choice-chip,
+.settings-card .background-choice { margin: 0; color: var(--text-main); cursor: pointer; }
+.choice-chip input,
+.background-choice input { position: absolute; opacity: 0; pointer-events: none; }
+.choice-chip > span {
+    display: flex;
+    min-height: 64px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-main);
+    color: var(--text-muted);
+    font-size: 12px;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.2s;
+}
+.choice-chip b { color: var(--accent); font-size: 15px; line-height: 1; }
+.choice-chip input:checked + span {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, var(--bg-main));
+    color: var(--text-main);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 19%, transparent);
+}
+.choice-chip:hover > span { transform: translateY(-1px); border-color: var(--accent); }
+.choice-chip input:focus-visible + span,
+.background-choice input:focus-visible + .background-swatch { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.background-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.background-choice { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: center; gap: 7px; }
+.background-swatch {
+    display: block;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-main);
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.background-aurora .background-swatch { background: radial-gradient(circle at 20% 15%, var(--accent), transparent 55%), var(--bg-main); }
+.background-grid .background-swatch { background-color: var(--bg-main); background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 8px 8px; }
+.background-minimal .background-swatch { background: var(--bg-main); }
+.background-nebula .background-swatch { background: radial-gradient(circle at 20% 20%, var(--accent), transparent 35%), radial-gradient(circle at 80% 65%, var(--accent-2), transparent 43%), var(--bg-main); }
+.background-choice > span:last-child { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.background-choice b { color: var(--text-main); font-size: 11px; }
+.background-choice small { overflow: hidden; color: var(--text-muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.background-choice input:checked ~ .background-swatch { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent); transform: translateY(-1px); }
+
+.appearance-actions { display: flex; align-items: center; gap: 10px; }
+.btn-reset {
+    margin-top: 16px;
+    padding: 11px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.btn-reset:hover { border-color: var(--accent); color: var(--text-main); background: color-mix(in srgb, var(--accent) 9%, transparent); }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 900px) {
+    html[data-density="compact"] .main-content { margin-left: 0; }
+}
+
+@media (max-width: 680px) {
+    .color-controls { grid-template-columns: 1fr; }
+    .background-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 430px) {
+    .settings-card-heading { gap: 10px; }
+    .custom-badge { display: none; }
+    .background-choice { grid-template-columns: 30px minmax(0, 1fr); }
+    .background-swatch { width: 30px; height: 30px; }
+}

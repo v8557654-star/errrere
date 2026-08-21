@@ -1,5 +1,12 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="{{ user_theme }}" data-animations="{{ 'on' if user_animations else 'off' }}">
+<html lang="ru"
+      data-theme="{{ user_theme }}"
+      data-animations="{{ 'on' if user_animations else 'off' }}"
+      data-density="{{ user_density }}"
+      data-corners="{{ user_corners }}"
+      data-background="{{ user_background }}"
+      data-custom-colors="{{ 'on' if custom_color_vars else 'off' }}"
+      {% if custom_color_vars %}style="{{ custom_color_vars }}"{% endif %}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -147,5 +154,6 @@ document.addEventListener('click', function(e) {
     }
 });
 </script>
+<script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
 </body>
 </html>

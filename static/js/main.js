@@ -159,6 +159,49 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Live appearance preview on the settings page. The server validates and persists
+    // the exact same values when the form is saved.
+    const appearanceForm = document.querySelector('#appearanceForm');
+    if (appearanceForm) {
+        const customColorsToggle = appearanceForm.querySelector('#custom-colors-toggle');
+        const colorControls = appearanceForm.querySelector('#colorControls');
+        const accentInput = appearanceForm.querySelector('#accent-color');
+        const accentSecondaryInput = appearanceForm.querySelector('#accent-color-secondary');
+        const colorOutputs = appearanceForm.querySelectorAll('[data-color-value]');
+
+        const selectedValue = (name, fallback) => {
+            const choice = appearanceForm.querySelector(`input[name="${name}"]:checked`);
+            return choice ? choice.value : fallback;
+        };
+
+        const updateAppearancePreview = () => {
+            const usesCustomColors = customColorsToggle.checked;
+            const accent = accentInput.value;
+            const secondary = accentSecondaryInput.value;
+
+            htmlEl.setAttribute('data-custom-colors', usesCustomColors ? 'on' : 'off');
+            htmlEl.setAttribute('data-density', selectedValue('interface_density', 'comfortable'));
+            htmlEl.setAttribute('data-corners', selectedValue('corner_style', 'rounded'));
+            htmlEl.setAttribute('data-background', selectedValue('background_style', 'aurora'));
+
+            if (usesCustomColors) {
+                htmlEl.style.setProperty('--user-accent', accent);
+                htmlEl.style.setProperty('--user-accent-2', secondary);
+            }
+
+            colorControls.classList.toggle('is-disabled', !usesCustomColors);
+            accentInput.disabled = !usesCustomColors;
+            accentSecondaryInput.disabled = !usesCustomColors;
+            colorOutputs.forEach((output, index) => {
+                output.textContent = (index === 0 ? accent : secondary).toUpperCase();
+            });
+        };
+
+        appearanceForm.addEventListener('input', updateAppearancePreview);
+        appearanceForm.addEventListener('change', updateAppearancePreview);
+        updateAppearancePreview();
+    }
+
     // Performance: Reduce motion for users who prefer it
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         document.documentElement.setAttribute('data-animations', 'off');
